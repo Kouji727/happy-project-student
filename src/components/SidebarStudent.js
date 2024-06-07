@@ -30,9 +30,8 @@ const initialNavigation = [
     icon: DocumentDuplicateIcon,
     current: false,
   },
-  { name: "Settings", href: "#", icon: CogIcon, current: false, children: [] },
+  { name: "Settings", href: "/settings", icon: CogIcon, current: false, children: [] },
 ];
-
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -40,7 +39,7 @@ function classNames(...classes) {
 
 export default function SidebarStudent({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState(null)
+  const [userEmail, setUserEmail] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [navigation, setNavigation] = useState(initialNavigation);
@@ -75,7 +74,7 @@ export default function SidebarStudent({ children }) {
   useEffect(() => {
     const updatedNavigation = initialNavigation.map((item) => ({
       ...item,
-      current: item.href === location.pathname, // Update current property based on the current URL
+      current: item.href === location.pathname,
     }));
     setNavigation(updatedNavigation);
   }, [location]);
@@ -151,12 +150,9 @@ export default function SidebarStudent({ children }) {
                         </div>
                         {userRole && (
                           <nav className="flex flex-1 flex-col">
-                            <ul
-                              role="list"
-                              className="flex flex-1 flex-col gap-y-7"
-                            >
+                            <ul className="flex flex-1 flex-col gap-y-7">
                               <li>
-                                <ul role="list" className="-mx-2 space-y-1">
+                                <ul className="-mx-2 space-y-1">
                                   {navigation.map((item) => (
                                     <li key={item.name}>
                                       <a
@@ -205,9 +201,9 @@ export default function SidebarStudent({ children }) {
                 </div>
                 {userRole && (
                   <nav className="flex flex-1 flex-col">
-                    <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                    <ul className="flex flex-1 flex-col gap-y-7">
                       <li>
-                        <ul role="list" className="-mx-2 space-y-1">
+                        <ul className="-mx-2 space-y-1">
                           {navigation.map((item) => (
                             <li key={item.name}>
                               <a
