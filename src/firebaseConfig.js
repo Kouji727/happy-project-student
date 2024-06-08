@@ -11,7 +11,7 @@ const apiKey = process.env.REACT_APP_API_KEY;
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCq_Wf4ElXvWWIDbdpUWAj6NUeK59PBORE",
+  apiKey: apiKey,
   authDomain: "happy-project-c9185.firebaseapp.com",
   projectId: "happy-project-c9185",
   storageBucket: "happy-project-c9185.appspot.com",

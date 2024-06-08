@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../components/AuthContext";
 import { db, storage } from "../firebaseConfig";
+import { motion, AnimatePresence } from 'framer-motion';
+import ModalSubject from "../components/Modal/index";
 import {
   collection,
   getDocs,
@@ -32,6 +34,8 @@ const StudentClearance = () => {
   const [isResubmitModalOpen, setIsResubmitModalOpen] = useState(false);
   const [subjectToResubmit, setSubjectToResubmit] = useState(null);
 
+
+  // Fetch Student Data
   useEffect(() => {
     const fetchStudentData = async () => {
       if (!currentUser) return;
@@ -53,6 +57,8 @@ const StudentClearance = () => {
     fetchStudentData();
   }, [currentUser]);
 
+
+  // Fetch Class Requirement based on section
   useEffect(() => {
     const fetchClassRequirements = async () => {
       if (!studentData || !studentData.section) return;
@@ -77,6 +83,8 @@ const StudentClearance = () => {
     fetchClassRequirements();
   }, [studentData]);
 
+
+  //Clearance Requests by Student
   useEffect(() => {
     const fetchClearanceRequests = async () => {
       if (!currentUser) return;
@@ -106,7 +114,13 @@ const StudentClearance = () => {
 
   const handleSubjectClick = (subject) => {
     setSelectedSubject(selectedSubject === subject ? null : subject);
-  };
+    console.log(selectedSubject)
+    };
+
+    const handleSubjectClickModal = (subject) => {
+      setSelectedSubject(selectedSubject === subject ? null : subject);
+      console.log(selectedSubject)
+      };
 
   const handleFileChange = (e) => {
     setFiles(Array.from(e.target.files));
@@ -190,6 +204,8 @@ const StudentClearance = () => {
 
   return (
     <SidebarStudent>
+      
+
       <div className="container mx-auto p-4">
         <h2 className="text-2xl font-semibold mb-4">Student Clearance</h2>
 
@@ -204,14 +220,15 @@ const StudentClearance = () => {
             </tr>
           </thead>
           <tbody>
+
             {studentData?.clearance &&
               Object.entries(studentData.clearance).map(
                 ([subject, isCleared]) => (
                   <React.Fragment key={subject}>
                     <tr>
                       <td
-                        className="border px-4 py-2 cursor-pointer"
-                        onClick={() => handleSubjectClick(subject)}
+                        className="border px-4 py-2"
+                        // onClick={() => handleSubjectClick(subject)}
                       >
                         {subject}
                       </td>
@@ -229,12 +246,16 @@ const StudentClearance = () => {
                         )}
                       </td>
                       <td className="border px-4 py-2">
-                        <button
+                        <motion.button
+                          whileHover={{scale: 1.03}}
+                          whileTap={{scale: 0.95}}
                           className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                          onClick={() => handleSubjectClick(subject)}
+                          //onClick={() => handleSubjectClick(subject)}
+                          onClick={() => handleSubjectClickModal(subject)}
+                          
                         >
                           View Details
-                        </button>
+                        </motion.button>
                       </td>
                     </tr>
 
@@ -347,6 +368,12 @@ const StudentClearance = () => {
                           </td>
                         </tr>
                       )}
+
+
+
+
+
+                      
                   </React.Fragment>
                 )
               )}
@@ -379,6 +406,17 @@ const StudentClearance = () => {
           </div>
         </div>
       </Modal>
+
+
+      <AnimatePresence
+        initial={false}
+        mode="wait"
+        onExitComplete={() => null}
+        >
+          {selectedSubject && <ModalSubject modalOpen={selectedSubject} handleClose={() => setSelectedSubject(null)}/>}
+        
+      </AnimatePresence>
+
     </SidebarStudent>
   );
 };
