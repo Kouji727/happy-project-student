@@ -52,7 +52,7 @@ const SignIn = () => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.3 }}
-        className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full"
+        className="bg-white p-8 rounded-lg shadow-lg sm:max-w-md w-[90%]"
       >
         <h1 className="text-2xl font-bold mb-6 text-center">Sign In</h1>
         {roleError && <p className="text-red-500 text-center mb-4">{roleError}</p>}

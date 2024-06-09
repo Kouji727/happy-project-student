@@ -11,7 +11,8 @@ import {
   addDoc,
   serverTimestamp,
   doc,
-  deleteDoc,
+  deleteDoc, 
+  onSnapshot,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import SidebarStudent from "../components/SidebarStudent";
@@ -84,16 +85,16 @@ const StudentClearance = () => {
   }, [studentData]);
 
 
-  //Clearance Requests by Student
-  useEffect(() => {
-    const fetchClearanceRequests = async () => {
-      if (!currentUser) return;
+// Clearance Requests by Student
+useEffect(() => {
+  const fetchClearanceRequests = () => {
+    if (!currentUser) return;
 
-      try {
-        const requestsRef = collection(db, "clearanceRequests");
-        const q = query(requestsRef, where("studentId", "==", currentUser.uid));
-        const requestsSnapshot = await getDocs(q);
+    try {
+      const requestsRef = collection(db, "clearanceRequests");
+      const q = query(requestsRef, where("studentId", "==", currentUser.uid));
 
+      const unsubscribe = onSnapshot(q, (requestsSnapshot) => {
         const requestsData = {};
         requestsSnapshot.forEach((doc) => {
           const data = doc.data();
@@ -104,13 +105,24 @@ const StudentClearance = () => {
           };
         });
         setClearanceRequests(requestsData);
-      } catch (error) {
-        console.error("Error fetching clearance requests:", error);
-      }
-    };
+      });
 
-    fetchClearanceRequests();
-  }, [currentUser]);
+      // Cleanup the listener on component unmount
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error fetching clearance requests:", error);
+    }
+  };
+
+  const unsubscribe = fetchClearanceRequests();
+
+  return () => {
+    if (unsubscribe) {
+      unsubscribe();
+    }
+  };
+}, [currentUser]);
+
 
   const handleSubjectClick = (subject) => {
     setSelectedSubject(selectedSubject === subject ? null : subject);
@@ -259,6 +271,8 @@ const StudentClearance = () => {
                       </td>
                     </tr>
 
+
+
                     {/* Expandable Section for Requirements & Request */}
                     {selectedSubject === subject &&
                       classRequirements[subject] && (
@@ -303,6 +317,7 @@ const StudentClearance = () => {
                                     </strong>
                                     .
                                   </p>
+
                                   {clearanceRequests[subject].status !==
                                     "approved" && (
                                     <button
@@ -315,8 +330,9 @@ const StudentClearance = () => {
                                         : "Resubmit Clearance"}
                                     </button>
                                   )}
+
                                   {clearanceRequests[subject].fileURLs &&
-                                  clearanceRequests[subject].fileURLs.length >
+                                    clearanceRequests[subject].fileURLs.length >
                                     0 ? (
                                     <div className="mt-2">
                                       <p className="text-sm font-medium text-gray-700">
@@ -408,14 +424,14 @@ const StudentClearance = () => {
       </Modal>
 
 
-      <AnimatePresence
+      {/* <AnimatePresence
         initial={false}
         mode="wait"
         onExitComplete={() => null}
         >
           {selectedSubject && <ModalSubject modalOpen={selectedSubject} handleClose={() => setSelectedSubject(null)}/>}
         
-      </AnimatePresence>
+      </AnimatePresence> */}
 
     </SidebarStudent>
   );
