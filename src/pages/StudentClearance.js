@@ -49,25 +49,30 @@ const StudentClearance = () => {
 
   // Fetch Student Data
   useEffect(() => {
-    const fetchStudentData = async () => {
-      if (!currentUser) return;
+    if (!currentUser) return;
 
+    const fetchStudentData = async () => {
       try {
         const studentsRef = collection(db, "students");
         const q = query(studentsRef, where("uid", "==", currentUser.uid));
-        const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) {
-          const studentDoc = querySnapshot.docs[0];
-          setStudentData(studentDoc.data());
-        }
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            setStudentData(doc.data());
+          });
+        });
+
+        return () => {
+          unsubscribe();
+        };
       } catch (error) {
         console.error("Error fetching student data:", error);
       }
     };
 
     fetchStudentData();
-  }, [currentUser]);
+  }, [currentUser, setStudentData]);
+  
 
 
   // Fetch Class Requirement based on section
@@ -133,15 +138,13 @@ const StudentClearance = () => {
           });
           setClearanceRequests(requestsData);
         });
-  
-        // Cleanup the listener on component unmount
+
         return unsubscribe;
       } catch (error) {
         console.error("Error fetching clearance requests:", error);
       }
     };
   
-    // Call the function directly
     const unsubscribeFunction = unsubscribe();
   
     return () => {
