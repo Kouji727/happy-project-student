@@ -23,7 +23,7 @@ const dropIn = {
     }
 }
 
-const ModalSubject = ({ handleClose, text }) => {
+const ModalSubject = ({ children, handleClose, text }) => {
 
     return (
         <Backdrop onClick={handleClose}>
@@ -36,9 +36,15 @@ const ModalSubject = ({ handleClose, text }) => {
                 animate="visible"
                 exit="exit"
             >
-                <button onClick={handleClose} className='bg-blue-100 px-[20%] z-50 absolute bottom-[10%] rounded-md'>
-                    Close
-                </button>
+                <div className='flex-col justify-center items-center flex '>
+                    {children}
+
+                    <button onClick={handleClose} className='bg-blue-100 px-[20%] z-50 rounded-md block mt-[1rem]'>
+                        Close
+                    </button>
+
+                </div>
+
             </motion.div>
 
         </Backdrop>
