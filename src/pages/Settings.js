@@ -7,11 +7,11 @@ const Settings = () => {
     <SidebarStudent>
       <div className='container'>
           <p>
-              Settings, 
+              Settings
           </p>
 
           <p>
-              Currently Working on it!
+              Change Password, dashbook look settings?
           </p>
       </div>
     </SidebarStudent>

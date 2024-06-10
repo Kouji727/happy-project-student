@@ -11,7 +11,7 @@ const Home = () => {
             </p>
 
             <p>
-                Currently Working on it!
+                User Details, Generate Clearance PDF, Clearance State
             </p>
         </div>
     </SidebarStudent>
