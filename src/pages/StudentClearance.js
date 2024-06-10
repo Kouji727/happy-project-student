@@ -237,6 +237,10 @@ const StudentClearance = () => {
           );
           return;
         }
+      } else {
+        alert(
+          "Error Clearance Request"
+        );
       }
 
       // Add to activityLog collection
@@ -258,12 +262,14 @@ const StudentClearance = () => {
     } finally {
       setIsUploading(false);
       setSubmitType(null);
+      setSubjectType(null);
     }
   };
   
-
-  const openResubmitModal = (subject) => {
-    setSubmitType('resubmit')
+  const [subjectType, setSubjectType] = useState(null)
+  const openResubmitModal = (subject, type) => {
+    setSubmitType('resubmit');
+    setSubjectType(type);
     setSubjectToResubmit(subject);
     setIsResubmitModalOpen(true);
   };
@@ -274,7 +280,6 @@ const StudentClearance = () => {
   };
 
   const handleResubmitClearance = async (subject, type) => {
-    
     closeResubmitModal();
 
   
@@ -436,7 +441,7 @@ const StudentClearance = () => {
               Cancel
             </button>
             <button
-              onClick={() => handleResubmitClearance(subjectToResubmit)}
+              onClick={() => handleResubmitClearance(subjectToResubmit, subjectType)}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Resubmit
