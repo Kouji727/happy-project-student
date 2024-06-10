@@ -20,7 +20,7 @@ const Log = ({ type, subject, date }) => {
                             Request Submission
                         </p>
                         <p>
-                            You submitted a request for <strong>{subject}</strong> at <strong>{date}</strong>
+                            Your request for <strong>{subject}</strong> was submitted on <strong>{date}</strong>
                         </p>
                     </div>
                 ) : (
@@ -29,7 +29,7 @@ const Log = ({ type, subject, date }) => {
                             Request Resubmission
                         </p>
                         <p>
-                            You resubmitted a request for <strong>{subject}</strong> at <strong>{date}</strong>
+                            Your request for <strong>{subject}</strong> was resubmitted on <strong>{date}</strong>
                         </p>
                     </div>
                 )
