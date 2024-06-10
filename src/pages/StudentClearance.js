@@ -45,6 +45,7 @@ const StudentClearance = () => {
   const [clearanceRequests, setClearanceRequests] = useState({});
   const [isResubmitModalOpen, setIsResubmitModalOpen] = useState(false);
   const [subjectToResubmit, setSubjectToResubmit] = useState(null);
+  const [submitType, setSubmitType] = useState(null);
 
 
   // Fetch Student Data
@@ -157,13 +158,15 @@ const StudentClearance = () => {
 
     const [ modalSubject, setModalSubject] = useState(null)
     const handleSubjectClick = (subject) => {
+      setSubmitType('submit');
       setModalSubject(subject);
       setSelectedSubject(selectedSubject === subject ? null : subject);
-      console.log(selectedSubject)
+      console.log(submitType)
       };
 
     const [ modalSubjectOffice, setModalSubjectOffice] = useState(null)
     const handleSubjectClickOffice = (subject) => {
+      setSubmitType('submit');
       setModalSubjectOffice(subject);
       setSelectedSubjectOffice(selectedSubject === subject ? null : subject);
       console.log(selectedSubjectOffice)
@@ -235,6 +238,15 @@ const StudentClearance = () => {
           return;
         }
       }
+
+      // Add to activityLog collection
+      const activityLogRef = collection(db, "activityLog");
+      await addDoc(activityLogRef, {
+        date: serverTimestamp(),
+        subject: subject,
+        type: submitType,
+        studentId: currentUser.uid
+      });
   
       alert("Clearance requested successfully!");
       setSelectedSubject(null);
@@ -245,11 +257,13 @@ const StudentClearance = () => {
       alert("Error requesting clearance. Please try again later.");
     } finally {
       setIsUploading(false);
+      setSubmitType(null);
     }
   };
   
 
   const openResubmitModal = (subject) => {
+    setSubmitType('resubmit')
     setSubjectToResubmit(subject);
     setIsResubmitModalOpen(true);
   };
@@ -260,7 +274,9 @@ const StudentClearance = () => {
   };
 
   const handleResubmitClearance = async (subject, type) => {
+    
     closeResubmitModal();
+
   
     try {
       const requestToDelete = clearanceRequests[subject];

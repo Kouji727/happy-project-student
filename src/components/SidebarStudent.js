@@ -7,6 +7,7 @@ import {
   HomeIcon,
   DocumentDuplicateIcon,
   CogIcon,
+  ClipboardDocumentListIcon
 } from "@heroicons/react/24/outline";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
@@ -24,12 +25,8 @@ const db = getFirestore();
 
 const initialNavigation = [
   { name: "Home", href: "/home", icon: HomeIcon, current: false },
-  {
-    name: "Clearance",
-    href: "/student-clearance",
-    icon: DocumentDuplicateIcon,
-    current: false,
-  },
+  { name: "Clearance", href: "/student-clearance", icon: DocumentDuplicateIcon, current: false},
+  { name: "Activity Log", href: "/activitylog", icon: ClipboardDocumentListIcon, current: false },
   { name: "Settings", href: "/settings", icon: CogIcon, current: false, children: [] },
 ];
 
@@ -232,7 +229,6 @@ export default function SidebarStudent({ children }) {
                       </li>
                       <li className="-mx-6 mt-auto">
                         <a
-                          href="#"
                           className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50"
                         >
                           <img
@@ -262,7 +258,7 @@ export default function SidebarStudent({ children }) {
               <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
                 Dashboard
               </div>
-              <a href="#">
+              <a>
                 <span className="sr-only">Your profile</span>
                 <img
                   className="h-8 w-8 rounded-full bg-gray-50"
