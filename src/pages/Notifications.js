@@ -1,64 +1,119 @@
-import React, { useEffect, useState } from 'react'
-import { useAuth } from "../components/AuthContext";
-import { db } from "../firebaseConfig";
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../components/AuthContext';
+import { db } from '../firebaseConfig';
 import {
   collection,
   getDocs,
   query,
   where,
-  onSnapshot
-} from "firebase/firestore";
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
 
-import SidebarStudent from '../components/SidebarStudent'
-import Log from '../components/Log'
+import SidebarStudent from '../components/SidebarStudent';
+import NotificationDesign from '../components/NotificationDesign';
 
 const Notifications = () => {
   const { currentUser } = useAuth();
-  const [logData, setLogData] = useState([])
+  const [notification, setNotification] = useState([])
 
-  // Fetch User Activity Log
+  // to be migrated on sidebar
+  const [clearanceRequest, setClearanceRequest] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+
+    const clearanceCollectionRef = collection(db, 'clearanceRequests');
+    const q = query(
+      clearanceCollectionRef,
+      where('studentId', '==', currentUser.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const requestsData = [];
+      const newNotifications = [];
+
+      querySnapshot.forEach((doc) => {
+        const requestData = { ...doc.data(), id: doc.id };
+        if (requestData.status !== 'pending') {
+          requestsData.push(requestData);
+          newNotifications.push(requestData);
+        }
+      });
+
+      setClearanceRequest(requestsData);
+
+      const notificationsCollectionRef = collection(db, 'studentNotification');
+      await Promise.all(newNotifications.map(async (item) => {
+        
+        const existingNotificationQuery = query(
+          notificationsCollectionRef,
+          where('studentId', '==', currentUser.uid),
+          where('subject', '==', item.subject),
+          where('timestamp', '==', item.timestamp)
+        );
+
+        const existingNotificationSnapshot = await getDocs(existingNotificationQuery);
+        if (existingNotificationSnapshot.empty) {
+          await addDoc(notificationsCollectionRef, {
+            studentId: currentUser.uid,
+            subject: item.subject,
+            status: item.status,
+            isRead: false,
+            timestamp: item.timestamp,
+            notifTimestamp: serverTimestamp(),
+          });
+        }
+      }));
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+  //to be migrated on sidebar
+
   useEffect(() => {
     if (!currentUser) return;
 
-    const logsCollectionRef = collection(db, 'activityLog');
-    const q = query(logsCollectionRef, where("studentId", "==", currentUser.uid));
+    const notifCollectionRef = collection(db, 'studentNotification');
+    const q = query(notifCollectionRef, where("studentId", "==", currentUser.uid));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const logs = snapshot.docs.map((doc) => {
+      const notif = snapshot.docs.map((doc) => {
         const data = doc.data();
-        const date = data.date.toDate();
+        const date = data.notifTimestamp.toDate();
         return { id: doc.id, ...data, date };
       });
 
-      logs.sort((a, b) => b.date - a.date);
+      notif.sort((a, b) => b.date - a.date);
 
-      const formattedLogs = logs.map((log) => ({
-        ...log,
-        date: log.date.toLocaleString()
+      const formattedNotif = notif.map((notifs) => ({
+        ...notifs,
+        date: notifs.date.toLocaleString()
       }));
 
-      setLogData(formattedLogs);
+      setNotification(formattedNotif);
     });
 
     return () => unsubscribe();
   }, [currentUser]);
 
+
   return (
     <SidebarStudent>
-        <div className="container mx-auto p-4"> 
-            <h2 className="text-2xl font-semibold mb-4">Activity Log</h2>
+      <div className="container mx-auto p-4">
+        <h2 className="text-2xl font-semibold mb-4">Notification</h2>
 
-            <div className='max-h-[80vh] overflow-scroll my-1'>
-              {logData.map((logs) => (
-                <Log key={logs.id} type={logs.type} subject={logs.subject} date={logs.date}/>
-              ))}
-
-            </div>
+        <div className='max-h-[80vh] overflow-auto my-1'>
+          {notification.map((item) => (
+            <NotificationDesign key={item.id} type={item.status} subject={item.subject}/>
+          ))}
         </div>
-
-
+      </div>
     </SidebarStudent>
-  )
-}
+  );
+};
 
-export default Notifications
+export default Notifications;
