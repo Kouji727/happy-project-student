@@ -12,7 +12,7 @@ import {
 import SidebarStudent from '../components/SidebarStudent'
 import Log from '../components/Log'
 
-const ActivityLog = () => {
+const Notifications = () => {
   const { currentUser } = useAuth();
   const [logData, setLogData] = useState([])
 
@@ -48,7 +48,7 @@ const ActivityLog = () => {
         <div className="container mx-auto p-4"> 
             <h2 className="text-2xl font-semibold mb-4">Activity Log</h2>
 
-            <div className='max-h-[80vh] my-1  overflow-auto'>
+            <div className='max-h-[80vh] overflow-scroll my-1'>
               {logData.map((logs) => (
                 <Log key={logs.id} type={logs.type} subject={logs.subject} date={logs.date}/>
               ))}
@@ -61,4 +61,4 @@ const ActivityLog = () => {
   )
 }
 
-export default ActivityLog
+export default Notifications

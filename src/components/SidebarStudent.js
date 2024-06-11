@@ -26,6 +26,7 @@ const db = getFirestore();
 const initialNavigation = [
   { name: "Home", href: "/home", icon: HomeIcon, current: false },
   { name: "Clearance", href: "/student-clearance", icon: DocumentDuplicateIcon, current: false},
+  { name: "Notification", href: "/notifications", icon: DocumentDuplicateIcon, current: false},
   { name: "Activity Log", href: "/activitylog", icon: ClipboardDocumentListIcon, current: false },
   { name: "Settings", href: "/settings", icon: CogIcon, current: false, children: [] },
 ];
