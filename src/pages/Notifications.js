@@ -83,15 +83,15 @@ const Notifications = () => {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const notif = snapshot.docs.map((doc) => {
         const data = doc.data();
-        const date = data.notifTimestamp.toDate();
+        const date = data.notifTimestamp ? data.notifTimestamp.toDate() : null;
         return { id: doc.id, ...data, date };
       });
 
-      notif.sort((a, b) => b.date - a.date);
+      notif.sort((a, b) => (b.date || 0) - (a.date || 0));
 
       const formattedNotif = notif.map((notifs) => ({
         ...notifs,
-        date: notifs.date.toLocaleString()
+        date: notifs.date ? notifs.date.toLocaleString() : null,
       }));
 
       setNotification(formattedNotif);
