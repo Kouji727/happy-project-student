@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useAuth } from '../components/AuthContext';
+import { motion } from 'framer-motion';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -365,13 +366,17 @@ export default function SidebarStudent({ children }) {
 
               <a href="/notifications">
                 <span className="sr-only">Notification</span>
-                  <div className="flex items-center rounded-full px-3 py-1 text-sm font-semibold text-gray-800">
+                  <motion.div 
+                  whileHover={{scale: 1.1, backgroundColor: '#eeeee4'}}
+                  whileTap={{scale: 0.90}}
+                  
+                  className="flex items-center rounded-full p-1 text-sm font-semibold text-gray-800">
                     {getUnreadNotification().length > 0 ? (
                       <BellAlertIcon className="h-6 w-6 text-red-400" />
                     ) : (
                       <BellIcon className="h-6 w-6" />
                     )}
-                </div>
+                </motion.div>
               </a>
 
               <a>
