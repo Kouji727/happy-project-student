@@ -3,12 +3,11 @@ import { useAuth } from '../components/AuthContext';
 import { db } from '../firebaseConfig';
 import {
   collection,
-  getDocs,
   query,
   where,
   onSnapshot,
-  addDoc,
-  serverTimestamp,
+  updateDoc,
+  doc
 } from 'firebase/firestore';
 
 import SidebarStudent from '../components/SidebarStudent';
@@ -17,62 +16,6 @@ import NotificationDesign from '../components/NotificationDesign';
 const Notifications = () => {
   const { currentUser } = useAuth();
   const [notification, setNotification] = useState([])
-
-  // to be migrated on sidebar
-  const [clearanceRequest, setClearanceRequest] = useState([]);
-
-  useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
-
-    const clearanceCollectionRef = collection(db, 'clearanceRequests');
-    const q = query(
-      clearanceCollectionRef,
-      where('studentId', '==', currentUser.uid)
-    );
-
-    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const requestsData = [];
-      const newNotifications = [];
-
-      querySnapshot.forEach((doc) => {
-        const requestData = { ...doc.data(), id: doc.id };
-        if (requestData.status !== 'pending') {
-          requestsData.push(requestData);
-          newNotifications.push(requestData);
-        }
-      });
-
-      setClearanceRequest(requestsData);
-
-      const notificationsCollectionRef = collection(db, 'studentNotification');
-      await Promise.all(newNotifications.map(async (item) => {
-        
-        const existingNotificationQuery = query(
-          notificationsCollectionRef,
-          where('studentId', '==', currentUser.uid),
-          where('subject', '==', item.subject),
-          where('timestamp', '==', item.timestamp)
-        );
-
-        const existingNotificationSnapshot = await getDocs(existingNotificationQuery);
-        if (existingNotificationSnapshot.empty) {
-          await addDoc(notificationsCollectionRef, {
-            studentId: currentUser.uid,
-            subject: item.subject,
-            status: item.status,
-            isRead: false,
-            timestamp: item.timestamp,
-            notifTimestamp: serverTimestamp(),
-          });
-        }
-      }));
-    });
-
-    return () => unsubscribe();
-  }, [currentUser]);
-  //to be migrated on sidebar
 
   useEffect(() => {
     if (!currentUser) return;
@@ -95,11 +38,20 @@ const Notifications = () => {
       }));
 
       setNotification(formattedNotif);
+
+      // Update documents where isRead is false
+      notif.forEach(async (notifItem) => {
+        if (!notifItem.isRead) {
+          const notifDocRef = doc(db, 'studentNotification', notifItem.id);
+          await updateDoc(notifDocRef, { isRead: true });
+        }
+      });
+
+
     });
 
     return () => unsubscribe();
   }, [currentUser]);
-
 
   return (
     <SidebarStudent>

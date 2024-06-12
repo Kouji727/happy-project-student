@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useAuth } from '../components/AuthContext';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -10,6 +11,11 @@ import {
   ClipboardDocumentListIcon,
   BellIcon
 } from "@heroicons/react/24/outline";
+
+import {
+  BellAlertIcon
+} from "@heroicons/react/24/solid";
+
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
@@ -17,6 +23,11 @@ import {
   where,
   query,
   getDocs,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  updateDoc,
+  doc
 } from "firebase/firestore";
 import { Spinner } from "@chakra-ui/react";
 import { useLocation } from "react-router-dom";
@@ -37,12 +48,88 @@ function classNames(...classes) {
 }
 
 export default function SidebarStudent({ children }) {
+  const { currentUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [navigation, setNavigation] = useState(initialNavigation);
   const location = useLocation();
+  const [notification, setNotification] = useState([]);
+  const filteredItems = navigation.filter(item => item.name !== "Notification");
+
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    const notifCollectionRef = collection(db, 'studentNotification');
+    const q = query(notifCollectionRef, where("studentId", "==", currentUser.uid));
+  
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const notifications = snapshot.docs.map((doc) => doc.data());
+      setNotification(notifications);
+    });
+  
+    return () => unsubscribe();
+  }, [currentUser]);  
+
+  // Filter unread clearance requests
+  const getUnreadNotification = () => {
+    if (!currentUser) {
+      return [];
+    }
+    return notification.filter(request => request.studentId === currentUser.uid && !request.isRead);
+  };
+  
+  // Generate Notification
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+
+    const clearanceCollectionRef = collection(db, 'clearanceRequests');
+    const q = query(
+      clearanceCollectionRef,
+      where('studentId', '==', currentUser.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const requestsData = [];
+      const newNotifications = [];
+
+      querySnapshot.forEach((doc) => {
+        const requestData = { ...doc.data(), id: doc.id };
+        if (requestData.status !== 'pending') {
+          requestsData.push(requestData);
+          newNotifications.push(requestData);
+        }
+      });
+
+      const notificationsCollectionRef = collection(db, 'studentNotification');
+      await Promise.all(newNotifications.map(async (item) => {
+        
+        const existingNotificationQuery = query(
+          notificationsCollectionRef,
+          where('studentId', '==', currentUser.uid),
+          where('subject', '==', item.subject),
+          where('timestamp', '==', item.timestamp)
+        );
+
+        const existingNotificationSnapshot = await getDocs(existingNotificationQuery);
+        if (existingNotificationSnapshot.empty) {
+          await addDoc(notificationsCollectionRef, {
+            studentId: currentUser.uid,
+            subject: item.subject,
+            status: item.status,
+            isRead: false,
+            timestamp: item.timestamp,
+            notifTimestamp: serverTimestamp(),
+          });
+        }
+      }));
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -77,6 +164,20 @@ export default function SidebarStudent({ children }) {
     }));
     setNavigation(updatedNavigation);
   }, [location]);
+
+  useEffect(() => {
+    const updatedNavigation = initialNavigation.map((item) => {
+      if (item.name === "Notification") {
+        return {
+          ...item,
+          icon: getUnreadNotification().length > 0 ? BellAlertIcon : BellIcon,
+        };
+      }
+      return item;
+    });
+
+    setNavigation(updatedNavigation);
+  }, [notification]);
 
   return (
     <>
@@ -152,7 +253,7 @@ export default function SidebarStudent({ children }) {
                             <ul className="flex flex-1 flex-col gap-y-7">
                               <li>
                                 <ul className="-mx-2 space-y-1">
-                                  {navigation.map((item) => (
+                                  {filteredItems.map((item) => (
                                     <li key={item.name}>
                                       <a
                                         href={item.href}
@@ -165,10 +266,8 @@ export default function SidebarStudent({ children }) {
                                       >
                                         <item.icon
                                           className={classNames(
-                                            item.current
-                                              ? "text-indigo-600"
-                                              : "text-gray-400 group-hover:text-indigo-600",
-                                            "h-6 w-6 shrink-0"
+                                            item.current ? "text-indigo-600" : "text-gray-400 group-hover:text-indigo-600",
+                                            "h-6 w-6 shrink-0",
                                           )}
                                           aria-hidden="true"
                                         />
@@ -241,7 +340,10 @@ export default function SidebarStudent({ children }) {
                           <span className="sr-only">Your profile</span>
                           <span aria-hidden="true">{userEmail}</span>
                         </a>
+                        
+                        
                       </li>
+                      
                     </ul>
                   </nav>
                 )}
@@ -260,6 +362,18 @@ export default function SidebarStudent({ children }) {
               <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
                 Dashboard
               </div>
+
+              <a href="/notifications">
+                <span className="sr-only">Notification</span>
+                  <div className="flex items-center rounded-full px-3 py-1 text-sm font-semibold text-gray-800">
+                    {getUnreadNotification().length > 0 ? (
+                      <BellAlertIcon className="h-6 w-6 text-red-400" />
+                    ) : (
+                      <BellIcon className="h-6 w-6" />
+                    )}
+                </div>
+              </a>
+
               <a>
                 <span className="sr-only">Your profile</span>
                 <img
@@ -269,6 +383,7 @@ export default function SidebarStudent({ children }) {
                 />
               </a>
             </div>
+            
 
             <main className="py-10 lg:pl-72">
               <div className="px-4 sm:px-6 lg:px-8">{children}</div>
