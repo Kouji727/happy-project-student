@@ -24,7 +24,7 @@ const SignIn = () => {
           const userDoc = querySnapshot.docs[0];
           const userData = userDoc.data();
           if (userData.role === 'student') {
-            navigate('/student-clearance');
+            navigate('/dashboard');
           } else {
             setRoleError('User role is not a student!');
           }

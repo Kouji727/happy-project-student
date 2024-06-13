@@ -108,9 +108,6 @@ const Home = () => {
                 )}
                 content={() => componentRef.current}
               />
-
-
-
           </div>
 
         </div>
