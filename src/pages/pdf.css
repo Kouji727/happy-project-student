@@ -1,0 +1,24 @@
+@media print {
+    @page {
+      size: A4 portrait;
+    }
+
+  
+    .print-container {
+        size: A4 portrait;
+        width: 90vw;
+        height: 100vh;
+        margin: 0 auto;
+        padding: 5rem;
+        font-size: 14px;
+      }
+  }
+
+  .hide-on-screen {
+    display: none;
+  }
+  
+  .show-on-print {
+    display: block;
+  }
+  

@@ -37,7 +37,7 @@ const auth = getAuth();
 const db = getFirestore();
 
 const initialNavigation = [
-  { name: "Home", href: "/home", icon: HomeIcon, current: false },
+  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
   { name: "Clearance", href: "/student-clearance", icon: DocumentDuplicateIcon, current: false},
   { name: "Notification", href: "/notifications", icon: BellIcon, current: false},
   { name: "Activity Log", href: "/activitylog", icon: ClipboardDocumentListIcon, current: false },

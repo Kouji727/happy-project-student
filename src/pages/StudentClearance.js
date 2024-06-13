@@ -161,7 +161,7 @@ const StudentClearance = () => {
       setSubmitType('submit');
       setModalSubject(subject);
       setSelectedSubject(selectedSubject === subject ? null : subject);
-      console.log(submitType)
+      console.log(selectedSubject)
       };
 
     const [ modalSubjectOffice, setModalSubjectOffice] = useState(null)
@@ -311,7 +311,7 @@ const StudentClearance = () => {
 
   return (
     <SidebarStudent>
-            <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4">
         <h2 className="text-2xl font-semibold mb-4">Student Clearance</h2>
 
         {/* Regular Subjects Table */}
