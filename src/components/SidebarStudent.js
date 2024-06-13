@@ -368,7 +368,7 @@ export default function SidebarStudent({ children }) {
                 <span className="sr-only">Notification</span>
                   <motion.div 
                   whileHover={{scale: 1.1, backgroundColor: '#eeeee4'}}
-                  whileTap={{scale: 0.90}}
+                  whileTap={{scale: 0.80}}
                   
                   className="flex items-center rounded-full p-1 text-sm font-semibold text-gray-800">
                     {getUnreadNotification().length > 0 ? (
