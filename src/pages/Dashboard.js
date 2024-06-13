@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../components/AuthContext";
-import { db, storage } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 import { motion } from 'framer-motion';
 import {
   collection,
@@ -26,7 +26,7 @@ const SPECIAL_SUBJECTS = [
   "Character Renewal Office",
 ];
 
-const Home = () => {
+const Dashboard = () => {
   const { currentUser } = useAuth();
   const [studentData, setStudentData] = useState(null);
   const [greetings, setGreetings] = useState(null);
@@ -101,7 +101,6 @@ const Home = () => {
                     whileHover={{scale: 1.03}}
                     whileTap={{scale: 0.95}}
                     className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 "
-                    // onClick={() => handleGeneratePdf(subject)}
                   >
                     Generate Clearance PDF
                   </motion.button>
@@ -241,4 +240,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

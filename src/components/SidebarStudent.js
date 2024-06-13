@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useAuth } from '../components/AuthContext';
@@ -27,8 +27,6 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
-  updateDoc,
-  doc
 } from "firebase/firestore";
 import { Spinner } from "@chakra-ui/react";
 import { useLocation } from "react-router-dom";
@@ -74,12 +72,13 @@ export default function SidebarStudent({ children }) {
   }, [currentUser]);  
 
   // Filter unread clearance requests
-  const getUnreadNotification = () => {
+  const getUnreadNotification = useCallback(() => {
     if (!currentUser) {
       return [];
     }
     return notification.filter(request => request.studentId === currentUser.uid && !request.isRead);
-  };
+  }, [currentUser, notification]);
+  
   
   // Generate Notification
   useEffect(() => {
@@ -176,9 +175,9 @@ export default function SidebarStudent({ children }) {
       }
       return item;
     });
-
+  
     setNavigation(updatedNavigation);
-  }, [notification]);
+  }, [notification, getUnreadNotification]);
 
   return (
     <>

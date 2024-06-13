@@ -3,7 +3,6 @@ import { useAuth } from "../components/AuthContext";
 import { db } from "../firebaseConfig";
 import {
   collection,
-  getDocs,
   query,
   where,
   onSnapshot

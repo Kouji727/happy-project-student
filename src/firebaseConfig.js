@@ -6,7 +6,7 @@ import { getStorage } from "firebase/storage"; // Import getStorage
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-const apiKey = process.env.REACT_APP_API_KEY;
+// const apiKey = process.env.REACT_APP_API_KEY;
 
 
 // Your web app's Firebase configuration
