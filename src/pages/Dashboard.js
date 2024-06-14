@@ -15,6 +15,8 @@ import {
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import ReactToPrint from "react-to-print";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import "./pdf.css"
 
 const SPECIAL_SUBJECTS = [
@@ -85,6 +87,21 @@ const Dashboard = () => {
     SPECIAL_SUBJECTS.includes(subject)
   );
 
+  const handleDownloadPDF = () => {
+    html2canvas(componentRef.current).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const imgWidth = 210; // A4 size
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save("student_clearance.pdf");
+    });
+  };
+
   return (
     <SidebarStudent>
       <div className="container mx-auto p-4">
@@ -107,14 +124,19 @@ const Dashboard = () => {
                 )}
                 content={() => componentRef.current}
               />
+                          <button
+              className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={handleDownloadPDF}
+            >
+              Download PDF
+            </button>
           </div>
 
         </div>
 
         {/* PDF Generate Page */}
 
-        <div ref={componentRef}>
-          <div className="print-container">
+          <div className="print-container" ref={componentRef}>
             <div className="pb-5">
               <div className="sm:flex justify-between">
                 <p className="text-xl font">
@@ -232,8 +254,6 @@ const Dashboard = () => {
           </div>
 
           </div>
-
-        </div>
 
 
     </SidebarStudent>
