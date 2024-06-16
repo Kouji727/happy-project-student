@@ -87,20 +87,20 @@ const Dashboard = () => {
     SPECIAL_SUBJECTS.includes(subject)
   );
 
-  // const handleDownloadPDF = () => {
-  //   html2canvas(componentRef.current).then((canvas) => {
-  //     const imgData = canvas.toDataURL("image/png");
-  //     const pdf = new jsPDF({
-  //       orientation: "portrait",
-  //       unit: "mm",
-  //       format: "a4",
-  //     });
-  //     const imgWidth = 210; // A4 size
-  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  //     pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-  //     pdf.save("student_clearance.pdf");
-  //   });
-  // };
+  const handleDownloadPDF = () => {
+    html2canvas(componentRef.current).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const imgWidth = 210; // A4 size
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save("student_clearance.pdf");
+    });
+  };
 
   return (
     <SidebarStudent>
@@ -124,7 +124,7 @@ const Dashboard = () => {
                 )}
                 content={() => componentRef.current}
               />
-              {/* 
+              
               <button
                 className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                 onClick={handleDownloadPDF}
@@ -132,7 +132,7 @@ const Dashboard = () => {
                 Download PDF
               </button>
               
-              */}
+             
           </div>
 
         </div>
