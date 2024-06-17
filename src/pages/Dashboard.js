@@ -32,6 +32,7 @@ const Dashboard = () => {
   const { currentUser } = useAuth();
   const [studentData, setStudentData] = useState(null);
   const [greetings, setGreetings] = useState(null);
+  const [loading, setLoading] = useState(false);
   const componentRef = useRef(null);
 
   useEffect(() => {
@@ -76,8 +77,8 @@ const Dashboard = () => {
   }, [currentUser, setStudentData]);
 
   const sortedSubjects = studentData?.clearance
-  ? Object.keys(studentData.clearance).sort()
-  : [];
+    ? Object.keys(studentData.clearance).sort()
+    : [];
 
   const regularSubjects = sortedSubjects.filter(
     (subject) => !SPECIAL_SUBJECTS.includes(subject)
@@ -88,22 +89,26 @@ const Dashboard = () => {
   );
 
   const handleDownloadPDF = async () => {
+    setLoading(true); // Set loading state to true
+
     const input = componentRef.current;
-  
+
     try {
       const pdfDataUri = await html2pdf().from(input).toPdf().output('datauristring');
-  
+
       const storage = getStorage();
-  
+
       const storageRef = ref(storage, `generatedPdf/${currentUser.uid}/${currentUser.uid}_clearance.pdf`);
-  
+
       await uploadString(storageRef, pdfDataUri, 'data_url');
-  
+
       const downloadURL = await getDownloadURL(storageRef);
-  
+
       window.open(downloadURL, '_blank');
     } catch (error) {
       console.error("Error generating or uploading PDF:", error);
+    } finally {
+      setLoading(false); // Reset loading state after try/catch
     }
   };
 
@@ -116,169 +121,170 @@ const Dashboard = () => {
           </div>
 
           <div className="flex justify-center">
-                  <motion.button
-                    whileHover={{scale: 1.03}}
-                    whileTap={{scale: 0.95}}
-                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 "
-                    onClick={handleDownloadPDF}
-                  >
-                    Generate Clearance PDF
-                  </motion.button>
+            <motion.button
+              whileHover={{scale: 1.03}}
+              whileTap={{scale: 0.95}}
+              className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              onClick={handleDownloadPDF}
+              disabled={loading}
+            >
+              {loading ? "Generating Clearance PDF..." : "Generate Clearance PDF"}
+            </motion.button>
           </div>
 
         </div>
 
         {/* PDF Generate Page */}
 
-          <div className="print-container p-7" ref={componentRef}>
-            <div className="pb-5">
-              <div className="flex print-layout justify-between">
-                <div className="flex">
-                  <p className="text-xl font">
-                    Name:
-                  </p>
+        <div className="print-container p-7" ref={componentRef}>
+          <div className="pb-5">
+            <div className="flex print-layout justify-between">
+              <div className="flex">
+                <p className="text-xl font">
+                  Name:
+                </p>
 
-                  <p className="text-xl font  pl-1">
-                    <strong>{studentData?.fullName}</strong>
-                  </p>
-
-                </div>
-
-                <div className="flex">
-                  <p className="text-xl">
-                    Section:
-                  </p>
-
-                  <p className="text-xl pl-1">
-                    <strong>{studentData?.section}</strong>
-                  </p>
-
-                </div>
-
+                <p className="text-xl font pl-1">
+                  <strong>{studentData?.fullName}</strong>
+                </p>
 
               </div>
-              
-              <div className="flex print-layout justify-between">
 
-              {studentData?.department &&(
+              <div className="flex">
+                <p className="text-xl">
+                  Section:
+                </p>
+
+                <p className="text-xl pl-1">
+                  <strong>{studentData?.section}</strong>
+                </p>
+
+              </div>
+
+
+            </div>
+
+            <div className="flex print-layout justify-between">
+
+              {studentData?.department && (
 
                 <div className="flex">
                   <p className="text-xl font">
                     Department:
                   </p>
 
-                  <p className="text-xl font  pl-1">
+                  <p className="text-xl font pl-1">
                     <strong>{studentData?.department}</strong>
                   </p>
                 </div>
-                )}
-                
+              )}
 
-                <div className="flex">
-                  <p className="text-xl">
-                    Grade Level:
-                  </p>
 
-                  <p className="text-xl pl-1">
-                    <strong>{studentData?.gradeLevel}</strong>
-                  </p>
+              <div className="flex">
+                <p className="text-xl">
+                  Grade Level:
+                </p>
 
-                </div>
-
+                <p className="text-xl pl-1">
+                  <strong>{studentData?.gradeLevel}</strong>
+                </p>
 
               </div>
 
-              <div className="border-2 border-green-300 mt-6"/>
+
             </div>
 
-            {/* Regular Subjects Table */}
-            <h2 className="text-xl font-semibold mb-4">Student Clearance</h2>
-            <table className="min-w-full bg-white border border-gray-200">
-              <thead>
-                <tr>
-                  <th className="py-2 border-b border-gray-200">Subject</th>
-                  <th className="py-2 border-b border-gray-200 text-center">
-                    Cleared
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {regularSubjects.map((subject) => (
-                  <React.Fragment key={subject}>
-                    <tr>
-                      <td
-                        className="border px-4 py-2"
-                      >
-                        {subject}
-                      </td>
-                      <td className="border px-4 py-2 text-center">
-                        {studentData.clearance[subject] ? (
-                          <FontAwesomeIcon
-                            icon={faCheckCircle}
-                            className="text-green-500"
-                          />
-                        ) : (
-                          <FontAwesomeIcon
-                            icon={faTimesCircle}
-                            className="text-red-500"
-                          />
-                        )}
-                      </td>
-
-                    </tr>
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Office Requirements Table */}
-            {specialSubjects.length > 0 && (
-              <div className="mt-8">
-                <h3 className="text-xl font-semibold mb-4">Office Requirements</h3>
-                <table className="min-w-full bg-white border border-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="py-2 border-b border-gray-200">
-                        Office Names
-                      </th>
-                      <th className="py-2 border-b border-gray-200 text-center">
-                        Cleared
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    {specialSubjects.map((office) => (
-                      <React.Fragment key={office}>
-                        <tr>
-                          <td
-                            className="border px-4 py-2"
-                          >
-                            {office}
-                          </td>
-                          <td className="border px-4 py-2 text-center">
-                            {studentData.clearance[office] ? (
-                              <FontAwesomeIcon
-                                icon={faCheckCircle}
-                                className="text-green-500"
-                              />
-                            ) : (
-                              <FontAwesomeIcon
-                                icon={faTimesCircle}
-                                className="text-red-500"
-                              />
-                            )}
-                          </td>
-                        </tr>
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="border-2 border-green-300 mt-6"/>
           </div>
 
-          </div>
+          {/* Regular Subjects Table */}
+          <h2 className="text-xl font-semibold mb-4">Student Clearance</h2>
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr>
+                <th className="py-2 border-b border-gray-200">Subject</th>
+                <th className="py-2 border-b border-gray-200 text-center">
+                  Cleared
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {regularSubjects.map((subject) => (
+                <React.Fragment key={subject}>
+                  <tr>
+                    <td
+                      className="border px-4 py-2"
+                    >
+                      {subject}
+                    </td>
+                    <td className="border px-4 py-2 text-center">
+                      {studentData.clearance[subject] ? (
+                        <FontAwesomeIcon
+                          icon={faCheckCircle}
+                          className="text-green-500"
+                        />
+                      ) : (
+                        <FontAwesomeIcon
+                          icon={faTimesCircle}
+                          className="text-red-500"
+                        />
+                      )}
+                    </td>
+
+                  </tr>
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Office Requirements Table */}
+          {specialSubjects.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4">Office Requirements</h3>
+              <table className="min-w-full bg-white border border-gray-200">
+                <thead>
+                  <tr>
+                    <th className="py-2 border-b border-gray-200">
+                      Office Names
+                    </th>
+                    <th className="py-2 border-b border-gray-200 text-center">
+                      Cleared
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  {specialSubjects.map((office) => (
+                    <React.Fragment key={office}>
+                      <tr>
+                        <td
+                          className="border px-4 py-2"
+                        >
+                          {office}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          {studentData.clearance[office] ? (
+                            <FontAwesomeIcon
+                              icon={faCheckCircle}
+                              className="text-green-500"
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon={faTimesCircle}
+                              className="text-red-500"
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+      </div>
 
 
     </SidebarStudent>
