@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../components/AuthContext";
 import { db } from "../firebaseConfig";
+import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { motion } from 'framer-motion';
 import {
   collection,
@@ -14,10 +15,9 @@ import {
   faCheckCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import ReactToPrint from "react-to-print";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import "./pdf.css"
+import html2pdf from 'html2pdf.js';
+
 
 const SPECIAL_SUBJECTS = [
   "Librarian",
@@ -87,82 +87,104 @@ const Dashboard = () => {
     SPECIAL_SUBJECTS.includes(subject)
   );
 
-  const handleDownloadPDF = () => {
-    html2canvas(componentRef.current).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-      const imgWidth = 210; // A4 size
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save("student_clearance.pdf");
-    });
+  const handleDownloadPDF = async () => {
+    const input = componentRef.current;
+  
+    try {
+      const pdfDataUri = await html2pdf().from(input).toPdf().output('datauristring');
+  
+      const storage = getStorage();
+  
+      const storageRef = ref(storage, `generatedPdf/${currentUser.uid}/${currentUser.uid}_clearance.pdf`);
+  
+      await uploadString(storageRef, pdfDataUri, 'data_url');
+  
+      const downloadURL = await getDownloadURL(storageRef);
+  
+      window.open(downloadURL, '_blank');
+    } catch (error) {
+      console.error("Error generating or uploading PDF:", error);
+    }
   };
 
   return (
     <SidebarStudent>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto">
         <div className="pb-10">
           <div className="flex justify-center">
             <h2 className="text-2xl font-semibold mb-4">{greetings}, {studentData?.fullName}!</h2>
           </div>
 
           <div className="flex justify-center">
-
-              <ReactToPrint
-                trigger={() => (
                   <motion.button
                     whileHover={{scale: 1.03}}
                     whileTap={{scale: 0.95}}
                     className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 "
+                    onClick={handleDownloadPDF}
                   >
                     Generate Clearance PDF
                   </motion.button>
-                )}
-                content={() => componentRef.current}
-              />
-              
-              <button
-                className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={handleDownloadPDF}
-              >
-                Download PDF
-              </button>
-              
-             
           </div>
 
         </div>
 
         {/* PDF Generate Page */}
 
-          <div className="print-container" ref={componentRef}>
+          <div className="print-container p-7" ref={componentRef}>
             <div className="pb-5">
-              <div className="sm:flex justify-between">
-                <p className="text-xl font">
-                  Name: <strong>{studentData?.fullName}</strong>
-                </p>
-
-                <p className="text-xl">
-                  Section: <strong>{studentData?.section}</strong>
-                </p>
-
-              </div>
-
-              <div className="sm:flex justify-between">
-                {studentData?.department &&(
+              <div className="flex print-layout justify-between">
+                <div className="flex">
                   <p className="text-xl font">
-                    Department: <strong>{studentData?.department}</strong>
+                    Name:
                   </p>
 
-                )}
+                  <p className="text-xl font  pl-1">
+                    <strong>{studentData?.fullName}</strong>
+                  </p>
 
-                <p className="text-xl">
-                  Grade Level: <strong>{studentData?.gradeLevel}</strong>
-                </p>
+                </div>
+
+                <div className="flex">
+                  <p className="text-xl">
+                    Section:
+                  </p>
+
+                  <p className="text-xl pl-1">
+                    <strong>{studentData?.section}</strong>
+                  </p>
+
+                </div>
+
+
+              </div>
+              
+              <div className="flex print-layout justify-between">
+
+              {studentData?.department &&(
+
+                <div className="flex">
+                  <p className="text-xl font">
+                    Department:
+                  </p>
+
+                  <p className="text-xl font  pl-1">
+                    <strong>{studentData?.department}</strong>
+                  </p>
+                </div>
+                )}
+                
+
+                <div className="flex">
+                  <p className="text-xl">
+                    Grade Level:
+                  </p>
+
+                  <p className="text-xl pl-1">
+                    <strong>{studentData?.gradeLevel}</strong>
+                  </p>
+
+                </div>
+
 
               </div>
 
