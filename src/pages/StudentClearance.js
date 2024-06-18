@@ -3,6 +3,8 @@ import { useAuth } from "../components/AuthContext";
 import { db, storage } from "../firebaseConfig";
 import { motion, AnimatePresence } from 'framer-motion';
 import ModalSubject from "../components/Modal/index";
+import ChatDesign from "../components/Chat/ChatDesign"
+import UserChatDesign from "../components/Chat/UserChatDesign";
 import {
   collection,
   getDocs,
@@ -21,6 +23,8 @@ import {
   faCheckCircle,
   faTimesCircle,
   faExclamationCircle,
+  faComments,
+
 } from "@fortawesome/free-solid-svg-icons";
 import Modal from "../components/Modal";
 
@@ -46,6 +50,7 @@ const StudentClearance = () => {
   const [isResubmitModalOpen, setIsResubmitModalOpen] = useState(false);
   const [subjectToResubmit, setSubjectToResubmit] = useState(null);
   const [submitType, setSubmitType] = useState(null);
+  const [inquiry, setInquiry] = useState(false);
 
 
   // Fetch Student Data
@@ -278,6 +283,11 @@ const StudentClearance = () => {
     setSubjectToResubmit(null);
     setIsResubmitModalOpen(false);
   };
+
+  const setInquiryModal = () => {
+    setInquiry(!inquiry);
+    console.log(inquiry);
+  }
 
   const handleResubmitClearance = async (subject, type) => {
     closeResubmitModal();
@@ -579,14 +589,14 @@ const StudentClearance = () => {
                           </tbody>
                         </table>
                       ):(
-                        <div>
-                          <p>
-                            No Requirements
-                          </p>
-                          <p>
-                            Button Here, inaantok na ko
-                          </p>
-                        </div>
+                        <>
+                          <button className="">
+                            <FontAwesomeIcon icon={faComments} className="text-green-500 text-2xl" onClick={() => setInquiryModal()}/>
+
+                          </button>
+
+                            
+                        </>
                       )}
               
             </ModalSubject>
@@ -596,7 +606,7 @@ const StudentClearance = () => {
           {/* For Offices */}
 
           {selectedSubjectOffice && (
-            <ModalSubject modalOpen={selectedSubjectOffice} handleClose={() => handleSubjectClickOffice(null)}>
+            <ModalSubject handleClose={() => handleSubjectClickOffice(null)}>
                     {/* Expandable Section for Office Requirements & Request */}
                     {selectedSubjectOffice === modalSubjectOffice &&
                       officeRequirements.some(
@@ -717,21 +727,29 @@ const StudentClearance = () => {
                       ):(
                         <div>
                         <p>
-                          No Requirements
-                        </p>
-                        <p>
-                          Button Here, inaantok na ko
+                          No Requirements!
                         </p>
                       </div>
                       )}
               
             </ModalSubject>
           )}
-
-
           
-        
+
       </AnimatePresence>
+
+      <AnimatePresence>
+        {inquiry && (
+            <ChatDesign handleClose={() => setInquiryModal()}>
+              <UserChatDesign userType={"student"}/>
+            </ChatDesign>
+        )}
+
+      </AnimatePresence>
+
+      
+
+      
 
     </SidebarStudent>
   );
