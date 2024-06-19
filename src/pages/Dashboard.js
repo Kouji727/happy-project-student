@@ -15,9 +15,8 @@ import {
   faCheckCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import "./pdf.css"
+import "./pdf.css";
 import html2pdf from 'html2pdf.js';
-
 
 const SPECIAL_SUBJECTS = [
   "Librarian",
@@ -89,28 +88,38 @@ const Dashboard = () => {
   );
 
   const handleDownloadPDF = async () => {
-    setLoading(true); // Set loading state to true
-
+    setLoading(true);
+  
     const input = componentRef.current;
-
+  
     try {
-      const pdfDataUri = await html2pdf().from(input).toPdf().output('datauristring');
-
+      const opt = {
+        margin:       0,
+        filename:     `${currentUser.uid}_clearance.pdf`,
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: 'avoid-all' },
+        html2pdf:     { width: input.offsetWidth, height: input.offsetHeight } // Set dimensions based on component size
+      };
+  
+      const pdfDataUri = await html2pdf().set(opt).from(input).toPdf().output('datauristring');
+  
       const storage = getStorage();
-
       const storageRef = ref(storage, `generatedPdf/${currentUser.uid}/${currentUser.uid}_clearance.pdf`);
-
+  
       await uploadString(storageRef, pdfDataUri, 'data_url');
-
+  
       const downloadURL = await getDownloadURL(storageRef);
 
       window.open(downloadURL, '_blank');
     } catch (error) {
       console.error("Error generating or uploading PDF:", error);
     } finally {
-      setLoading(false); // Reset loading state after try/catch
+      setLoading(false);
     }
   };
+  
 
   return (
     <SidebarStudent>
@@ -131,11 +140,9 @@ const Dashboard = () => {
               {loading ? "Generating Clearance PDF..." : "Generate Clearance PDF"}
             </motion.button>
           </div>
-
         </div>
 
         {/* PDF Generate Page */}
-
         <div className="print-container p-7" ref={componentRef}>
           <div className="pb-5">
             <div className="flex print-layout justify-between">
@@ -143,55 +150,41 @@ const Dashboard = () => {
                 <p className="text-xl font">
                   Name:
                 </p>
-
                 <p className="text-xl font pl-1">
                   <strong>{studentData?.fullName}</strong>
                 </p>
-
               </div>
 
               <div className="flex">
                 <p className="text-xl">
                   Section:
                 </p>
-
                 <p className="text-xl pl-1">
                   <strong>{studentData?.section}</strong>
                 </p>
-
               </div>
-
-
             </div>
 
             <div className="flex print-layout justify-between">
-
               {studentData?.department && (
-
                 <div className="flex">
                   <p className="text-xl font">
                     Department:
                   </p>
-
                   <p className="text-xl font pl-1">
                     <strong>{studentData?.department}</strong>
                   </p>
                 </div>
               )}
 
-
               <div className="flex">
                 <p className="text-xl">
                   Grade Level:
                 </p>
-
                 <p className="text-xl pl-1">
                   <strong>{studentData?.gradeLevel}</strong>
                 </p>
-
               </div>
-
-
             </div>
 
             <div className="border-2 border-green-300 mt-6"/>
@@ -212,9 +205,7 @@ const Dashboard = () => {
               {regularSubjects.map((subject) => (
                 <React.Fragment key={subject}>
                   <tr>
-                    <td
-                      className="border px-4 py-2"
-                    >
+                    <td className="border px-4 py-2">
                       {subject}
                     </td>
                     <td className="border px-4 py-2 text-center">
@@ -230,7 +221,6 @@ const Dashboard = () => {
                         />
                       )}
                     </td>
-
                   </tr>
                 </React.Fragment>
               ))}
@@ -253,13 +243,10 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-
                   {specialSubjects.map((office) => (
                     <React.Fragment key={office}>
                       <tr>
-                        <td
-                          className="border px-4 py-2"
-                        >
+                        <td className="border px-4 py-2">
                           {office}
                         </td>
                         <td className="border px-4 py-2 text-center">
@@ -283,10 +270,7 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-
       </div>
-
-
     </SidebarStudent>
   );
 };
