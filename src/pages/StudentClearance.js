@@ -33,8 +33,14 @@ const SPECIAL_SUBJECTS = [
   "Finance",
   "Director/Principal",
   "Basic Education Registrar",
-  "Class Adviser",
   "Character Renewal Office",
+  "College Library",
+  "Guidance Office",
+  "Office of The Dean",
+  "Office of the Finance Director",
+  "Office of the Registrar",
+  "Property Custodian",
+  "Student Council",
 ];
 
 const StudentClearance = () => {
@@ -325,6 +331,7 @@ const StudentClearance = () => {
         <h2 className="text-2xl font-semibold mb-4">Student Clearance</h2>
 
         {/* Regular Subjects Table */}
+        {studentData?.educationLevel !== "college" && (
         <table className="min-w-full bg-white border border-gray-200">
           <thead>
             <tr>
@@ -373,6 +380,7 @@ const StudentClearance = () => {
             ))}
           </tbody>
         </table>
+      )}
 
         {/* Office Requirements Table */}
         {specialSubjects.length > 0 && (

@@ -46,7 +46,7 @@ const SignIn = () => {
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-blue-400">
+    <div className="min-h-screen flex items-center justify-center bg-[#728cee]">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -59,7 +59,7 @@ const SignIn = () => {
         {error && <p className="text-red-500 text-center mb-4">{error.message}</p>}
         <form onSubmit={handleSignIn} className="space-y-4">
           <div>
-            <label className="block text-gray-700">Email</label>
+            <label className="block text-black">Email</label>
             <input
               type="email"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -69,7 +69,7 @@ const SignIn = () => {
             />
           </div>
           <div>
-            <label className="block text-gray-700">Password</label>
+            <label className="block text-black">Password</label>
             <input
               type="password"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -82,7 +82,7 @@ const SignIn = () => {
             whileHover={{scale: 1.03}}
             whileTap={{scale: 0.95}}
             type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+            className="w-full py-2 px-4 bg-[#1d1c8b] text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
             disabled={loading}
           >
             {loading ? 'Signing in...' : 'Sign In'}

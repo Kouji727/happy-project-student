@@ -158,26 +158,24 @@ export default function SidebarStudent({ children }) {
   }, [userRole]);
 
   useEffect(() => {
-    const updatedNavigation = initialNavigation.map((item) => ({
-      ...item,
-      current: item.href === location.pathname,
-    }));
-    setNavigation(updatedNavigation);
-  }, [location]);
-
-  useEffect(() => {
     const updatedNavigation = initialNavigation.map((item) => {
       if (item.name === "Notification") {
         return {
           ...item,
           icon: getUnreadNotification().length > 0 ? BellAlertIcon : BellIcon,
+          current: item.href === location.pathname,
+        };
+      } else {
+        return {
+          ...item,
+          current: item.href === location.pathname,
         };
       }
-      return item;
     });
   
     setNavigation(updatedNavigation);
-  }, [notification, getUnreadNotification]);
+  }, [location.pathname, notification, getUnreadNotification]);
+  
 
   return (
     <>
@@ -289,7 +287,7 @@ export default function SidebarStudent({ children }) {
 
             {/* Static sidebar for desktop */}
             <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-[#bcc9fb] px-6">
                 <div className="flex h-16 shrink-0 items-center">
                   <img
                     className="h-10 w-auto"
@@ -389,7 +387,7 @@ export default function SidebarStudent({ children }) {
             </div>
             
 
-            <main className="py-10 lg:pl-72">
+            <main className="py-10 lg:pl-72 bg-white">
               <div className="px-4 sm:px-6 lg:px-8">{children}</div>
             </main>
           </div>
