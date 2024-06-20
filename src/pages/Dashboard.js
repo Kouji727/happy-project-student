@@ -100,7 +100,7 @@ const Dashboard = () => {
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak:    { mode: 'avoid-all' },
-        html2pdf:     { width: input.offsetWidth, height: input.offsetHeight } // Set dimensions based on component size
+        html2pdf:     { width: input.offsetWidth, height: input.offsetHeight }
       };
   
       const pdfDataUri = await html2pdf().set(opt).from(input).toPdf().output('datauristring');
