@@ -23,9 +23,16 @@ const ChatDesign = ({ handleClose, children }) => {
 
   return (
     <Backdrop>
+        <div className='w-[95%] sm:w-[50%] bg-red-500 h-[90%] overflow-auto'>
 
-        <div className='w-[95%] bg-red-500 h-[90%]'>
-            <div className='w-[100%] sm:h-[85%] h-[80%] bg-green-300  overflow-auto'>
+            <div className='bg-blue-100 p-3'>
+                <p>
+                    OFFICE/SUBJECT NAME PLACEHOLDER
+                </p>
+            </div>
+
+
+            <div className='w-[100%] sm:h-[85%] h-[80%] bg-green-300  overflow-auto p-3'>
                 <div className='flex justify-center h-full overflow-scroll'>
                     <div className='w-[100%]'>
 
@@ -37,26 +44,25 @@ const ChatDesign = ({ handleClose, children }) => {
             </div>
 
 
-            <div className='absoulte bottom-0'>
-                <div className='bg-blue-100 p-3'>
-                    <textarea
-                        className='w-full rounded-3xl px-3 py-2 items-center resize-none'
-                        placeholder='Type your message here...'
-                        value={message}
-                        onChange={handleInputChange}
-                        rows={1}
-                        style={{ maxHeight: 'calc(6 * var(--line-height))' }}
-                    />
-                </div>
+            <div className='bg-blue-100 p-3'>
+                <textarea
+                    className='w-full rounded-3xl px-3 py-2 items-center resize-none'
+                    placeholder='Type your message here...'
+                    value={message}
+                    onChange={handleInputChange}
+                    rows={1}
+                    style={{ maxHeight: 'calc(6 * var(--line-height))' }}
+                />
             </div>
+
 
         
 
-            <div className='flex justify-center'>
-                <button onClick={handleClose} className='bg-green-500 w-14 h-14 aspect-square flex rounded-full justify-center items-center'>
-                    x
-                </button>
-            </div>
+        <div className='flex justify-center'>
+            <button onClick={handleClose} className='bg-green-500 w-14 h-14 aspect-square flex rounded-full justify-center items-center'>
+                x
+            </button>
+        </div>
 
 
         </div>
