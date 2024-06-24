@@ -10,7 +10,9 @@ import {
   DocumentDuplicateIcon,
   CogIcon,
   ClipboardDocumentListIcon,
-  BellIcon
+  BellIcon,
+  InboxIcon,
+  LockClosedIcon
 } from "@heroicons/react/24/outline";
 
 import {
@@ -38,8 +40,9 @@ const initialNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
   { name: "Clearance", href: "/student-clearance", icon: DocumentDuplicateIcon, current: false},
   { name: "Notification", href: "/notifications", icon: BellIcon, current: false},
+  { name: "Inbox", href: "/view-messages-student", icon: InboxIcon, current: false },
   { name: "Activity Log", href: "/activitylog", icon: ClipboardDocumentListIcon, current: false },
-  { name: "Settings", href: "/settings", icon: CogIcon, current: false, children: [] },
+  { name: "Change Password", href: "/settings", icon: LockClosedIcon, current: false, children: [] },
 ];
 
 function classNames(...classes) {
@@ -79,7 +82,7 @@ export default function SidebarStudent({ children }) {
     return notification.filter(request => request.studentId === currentUser.uid && !request.isRead);
   }, [currentUser, notification]);
   
-  
+  // DELETE THIS AND REPLACE WITH MANUAL
   // Generate Notification
   useEffect(() => {
     if (!currentUser) {
@@ -157,6 +160,7 @@ export default function SidebarStudent({ children }) {
     });
   }, [userRole]);
 
+  // ADD INBOX HERE
   useEffect(() => {
     const updatedNavigation = initialNavigation.map((item) => {
       if (item.name === "Notification") {
@@ -238,7 +242,7 @@ export default function SidebarStudent({ children }) {
                           </button>
                         </div>
                       </Transition.Child>
-                      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2">
+                      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-[#bcc9fb] px-6 pb-2">
                         <div className="flex h-16 shrink-0 items-center">
                           <img
                             className="h-10 w-auto"
@@ -257,15 +261,17 @@ export default function SidebarStudent({ children }) {
                                         href={item.href}
                                         className={classNames(
                                           item.current
-                                            ? "bg-gray-50 text-indigo-600"
-                                            : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50",
+                                            ? "bg-[#fff2c1] text-[#494124]"
+                                            : "text-gray-700 hover:text-[#494124] hover:bg-[#fffbec]",
                                           "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                         )}
                                       >
                                         <item.icon
                                           className={classNames(
-                                            item.current ? "text-indigo-600" : "text-gray-400 group-hover:text-indigo-600",
-                                            "h-6 w-6 shrink-0",
+                                            item.current
+                                              ? "text-[#494124]"
+                                              : "text-gray-400 group-hover:text-[#494124]",
+                                            "h-6 w-6 shrink-0"
                                           )}
                                           aria-hidden="true"
                                         />
@@ -306,16 +312,16 @@ export default function SidebarStudent({ children }) {
                                 href={item.href}
                                 className={classNames(
                                   item.current
-                                    ? "bg-gray-50 text-indigo-600"
-                                    : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50",
+                                    ? "bg-[#fff2c1] text-[#494124]"
+                                    : "text-gray-700 hover:text-[#494124] hover:bg-[#fffbec]",
                                   "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                 )}
                               >
                                 <item.icon
                                   className={classNames(
                                     item.current
-                                      ? "text-indigo-600"
-                                      : "text-gray-400 group-hover:text-indigo-600",
+                                      ? "text-[#494124]"
+                                      : "text-gray-400 group-hover:text-[#494124]",
                                     "h-6 w-6 shrink-0"
                                   )}
                                   aria-hidden="true"

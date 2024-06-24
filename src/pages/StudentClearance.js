@@ -57,7 +57,7 @@ const StudentClearance = () => {
   const [subjectToResubmit, setSubjectToResubmit] = useState(null);
   const [submitType, setSubmitType] = useState(null);
   const [inquiry, setInquiry] = useState(false);
-
+  const [inquiryData, setInquiryData] = useState([]);
 
   // Fetch Student Data
   useEffect(() => {
@@ -292,7 +292,6 @@ const StudentClearance = () => {
 
   const setInquiryModal = () => {
     setInquiry(!inquiry);
-    console.log(inquiry);
   }
 
   const handleResubmitClearance = async (subject, type) => {
@@ -325,6 +324,74 @@ const StudentClearance = () => {
     SPECIAL_SUBJECTS.includes(subject)
   );
 
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    const inquiryCollectionRef = collection(db, 'inquiries');
+  
+    const qRecipient = query(inquiryCollectionRef,
+      where('subject', '==', selectedSubject),
+      where('recipientId', '==', currentUser.uid)
+    );
+  
+    const qStudent = query(inquiryCollectionRef,
+      where('subject', '==', selectedSubject),
+      where('studentId', '==', currentUser.uid)
+    );
+  
+    const mergeAndSortInquiries = (recipientDocs, studentDocs) => {
+      const recipientInquiries = recipientDocs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        date: doc.data().timestamp.toDate()
+      }));
+  
+      const studentInquiries = studentDocs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        date: doc.data().timestamp.toDate()
+      }));
+  
+      const combinedInquiries = [...recipientInquiries, ...studentInquiries];
+      combinedInquiries.sort((a, b) => a.date - b.date);
+  
+      const uniqueInquiries = combinedInquiries.reduce((acc, inquiry) => {
+        if (!acc.find(item => item.id === inquiry.id)) {
+          acc.push({
+            ...inquiry,
+            date: inquiry.date.toLocaleString()
+          });
+        }
+        return acc;
+      }, []);
+  
+      return uniqueInquiries;
+    };
+  
+    const unsubscribeRecipient = onSnapshot(qRecipient, async (snapshot) => {
+      const recipientDocs = snapshot.docs;
+      const studentSnapshot = await getDocs(qStudent);
+      const studentDocs = studentSnapshot.docs;
+  
+      const mergedInquiries = mergeAndSortInquiries(recipientDocs, studentDocs);
+      setInquiryData(mergedInquiries);
+    });
+  
+    const unsubscribeStudent = onSnapshot(qStudent, async (snapshot) => {
+      const studentDocs = snapshot.docs;
+      const recipientSnapshot = await getDocs(qRecipient);
+      const recipientDocs = recipientSnapshot.docs;
+  
+      const mergedInquiries = mergeAndSortInquiries(recipientDocs, studentDocs);
+      setInquiryData(mergedInquiries);
+    });
+  
+    return () => {
+      unsubscribeRecipient();
+      unsubscribeStudent();
+    };
+  }, [currentUser, selectedSubject]);
+  
   return (
     <SidebarStudent>
       <div className="container mx-auto p-4">
@@ -477,13 +544,21 @@ const StudentClearance = () => {
             <ModalSubject modalOpen={selectedSubject} handleClose={() => handleSubjectClick(null)}>
                 {/* Expandable Section for Requirements & Request */}
                 {selectedSubject === modalSubject &&
-                      classRequirements[modalSubject] ? (
-                        <table>
+                      classRequirements[modalSubject] ? (     
+                        <>
+                            
+                        <table className="w-full">
                           <tbody>
-
-                            <tr className="bg-gray-100">
+                            <tr className="bg-white">
                               <td colSpan={3} className="border px-4 py-2">
+                                                                           {/* Ensure classRequirements[modalSubject] exists */}
+                {classRequirements[modalSubject] && (
+                  <p>Teacher UID: {classRequirements[modalSubject][0].teacherUid}</p>
+                )}
                                 {/* Requirements List */}
+                                <h4 className="text-md font-semibold">
+                              Requirements:
+                            </h4>
                                 <ul className="list-disc list-inside">
                                   {(classRequirements[modalSubject] || []).map(
                                     (requirement, index) => (
@@ -499,29 +574,30 @@ const StudentClearance = () => {
                                 <div className="mt-4">
                                   {clearanceRequests[modalSubject] ? (
                                     <div>
-                                      <p className="mb-2">
-                                        <FontAwesomeIcon
-                                          icon={faExclamationCircle}
-                                          className={
-                                            clearanceRequests[modalSubject].status ===
-                                            "approved"
-                                              ? "text-green-500 mr-2"
-                                              : "text-yellow-500 mr-2"
-                                          }
-                                        />
-                                        Your clearance request is currently{" "}
-                                        <strong
-                                          className={
-                                            clearanceRequests[modalSubject].status ===
-                                            "approved"
-                                              ? "text-green-500"
-                                              : ""
-                                          }
-                                        >
-                                          {clearanceRequests[modalSubject].status}
-                                        </strong>
-                                        .
-                                      </p>
+                                      
+                                      <div
+                                         className={`flex justify-center items-center p-2 px-5 rounded-full ${
+                                           clearanceRequests[modalSubject].status ===
+                                           "approved"
+                                             ? "bg-green-100 text-green-800"
+                                             : clearanceRequests[modalSubject].status ===
+                                               "rejected"
+                                             ? "bg-red-100 text-red-800"
+                                             : "bg-yellow-100 text-yellow-800"
+                                         }`}
+                                       >
+                                          <FontAwesomeIcon
+                                            icon={faExclamationCircle}
+                                            className="mr-2"
+                                          />
+                                          <span>
+                                            Your clearance request is currently{" "}
+                                            <strong>
+                                              {clearanceRequests[modalSubject].status}
+                                            </strong>
+                                            .
+                                          </span>
+                                        </div>
 
                                       {clearanceRequests[modalSubject].status !==
                                         "approved" && (
@@ -596,14 +672,28 @@ const StudentClearance = () => {
 
                           </tbody>
                         </table>
+
+                        <div className="flex justify-center p-2 w-full mt-3">
+                          <motion.div
+                           whileHover={{scale: 1.03}}
+                           whileTap={{scale: 0.95}}
+                           className="bg-white gap-2 flex p-2 px-10 justify-center items-center rounded-full hover:cursor-pointer" onClick={() => setInquiryModal()}>
+                              <FontAwesomeIcon icon={faComments} className="text-[#5468b2] text-2xl"/>
+                              <strong className="text-[#5468b2]">Send Inquiry</strong>
+                          </motion.div>
+
+                        </div>
+
+                        
+                        </>  
+                        
                       ):(
                         <>
-                          <button className="">
-                            <FontAwesomeIcon icon={faComments} className="text-green-500 text-2xl" onClick={() => setInquiryModal()}/>
-
-                          </button>
-
-                            
+                          <div className="flex items-center justify-center">
+                            <p className="text-center">
+                              Currently, there are no specific requirements for <strong>{selectedSubject}</strong>
+                            </p>
+                          </div>
                         </>
                       )}
               
@@ -620,11 +710,14 @@ const StudentClearance = () => {
                       officeRequirements.some(
                         (requirement) => requirement.office === modalSubjectOffice
                       ) ? (
-                        <table>
+                        <table className="w-full">
                           <tbody>
                             <tr className="bg-gray-100">
                               <td colSpan={3} className="border px-4 py-2">
                                 {/* Office Requirements List */}
+                                <h4 className="text-md font-semibold">
+                                  Requirements:
+                                </h4>
                                 <ul className="list-disc list-inside">
                                   {officeRequirements
                                     .filter(
@@ -733,11 +826,11 @@ const StudentClearance = () => {
                           </tbody>
                         </table>
                       ):(
-                        <div>
-                        <p>
-                          No Requirements!
-                        </p>
-                      </div>
+                        <div className="flex justify-center">
+                          <p>
+                            Currently, there are no specific requirements for <strong>{selectedSubjectOffice}</strong>
+                          </p>
+                        </div>
                       )}
               
             </ModalSubject>
@@ -748,8 +841,18 @@ const StudentClearance = () => {
 
       <AnimatePresence>
         {inquiry && (
-            <ChatDesign handleClose={() => setInquiryModal()}>
-              <UserChatDesign userType={"student"}/>
+            <ChatDesign handleClose={() => setInquiryModal()} subject={selectedSubject}>
+              {inquiryData.map((inquiry) => (
+                <UserChatDesign
+                  key={inquiry.id}
+                  userType={inquiry.studentId === currentUser.uid ? "student" : "other"}
+                  data={inquiry}
+
+                >
+                  {inquiry.message}
+                </UserChatDesign>
+              ))}
+
             </ChatDesign>
         )}
 

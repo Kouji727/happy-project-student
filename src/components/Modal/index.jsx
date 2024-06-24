@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
 import Backdrop from '../Backdrop';
 import './modal.css';
+import {
+    XMarkIcon
+  } from "@heroicons/react/24/solid";
 
 const dropIn = {
     hidden: {
@@ -30,18 +33,28 @@ const ModalSubject = ({ children, handleClose, text }) => {
 
             <motion.div
                 onClick={(e) => e.stopPropagation()}
-                className='modal bg-white'
+                className='modal bg-[#bcc9fb]'
                 variants={dropIn}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
             >
-                <div className='flex-col justify-center items-center flex '>
-                    {children}
+                <div className='flex-col items-center w-full'>
+                    <div className='w-full overflow-auto'>
+                        {children}
 
-                    <button onClick={handleClose} className='bg-blue-100 px-[20%] z-50 rounded-md block mt-[1rem]'>
-                        Close
-                    </button>
+                    </div>
+
+                    <div className='flex justify-center items-center'>
+                        <motion.button 
+                         whileHover={{scale: 1.03}}
+                         whileTap={{scale: 0.95}}
+                         onClick={handleClose} className='bg-red-400 p-2 z-50 rounded-full mt-5 shadow-red-950 shadow-sm'>
+                            <XMarkIcon className='w-5 h-5 text-red-900'/>
+                        </motion.button>
+
+                    </div>
+
 
                 </div>
 

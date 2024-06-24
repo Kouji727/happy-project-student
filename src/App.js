@@ -7,6 +7,7 @@ import StudentClearance from "./pages/StudentClearance";
 import Dashboard from "./pages/Dashboard";
 import ActivityLog from "./pages/ActivityLog";
 import Notifications from "./pages/Notifications";
+import ViewMessagesStudent from "./pages/ViewMessagesStudent";
 
 const router = createBrowserRouter([
   { path: "/", element: <SignIn /> },
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
   { path: "/notifications", element: <Notifications /> },
   { path: "/activitylog", element: <ActivityLog /> },
   { path: "/settings", element: <Settings /> },
+  { path: "/view-messages-student", element: <ViewMessagesStudent />},
 ]);
 function App() {
   return (
