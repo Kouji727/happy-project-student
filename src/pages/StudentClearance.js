@@ -64,7 +64,6 @@ const StudentClearance = () => {
   const [ forOfficeUIDSubject, setForOfficeUIDSubject] = useState(null)
   const [inquiry, setInquiry] = useState(false);
   const [inquiryData, setInquiryData] = useState([]);
-  const [inquiryDataOffice, setInquiryDataOffice] = useState([]);
   const [subjbectForInquiry, setsubjbectForInquiry] = useState(null)
   const [teacherUID, setTeacherUID] = useState('');
 

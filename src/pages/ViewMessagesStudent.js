@@ -9,11 +9,13 @@ import {
   deleteDoc,
   addDoc,
   serverTimestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useAuth } from "../components/AuthContext";
 import SidebarStudent from "../components/SidebarStudent";
 import moment from "moment";
+import { motion } from 'framer-motion';
 import Modal from "../components/Modal";
 
 function ViewMessagesStudent() {
@@ -24,6 +26,77 @@ function ViewMessagesStudent() {
   const [replyTo, setReplyTo] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [replyIdToDelete, setReplyIdToDelete] = useState(null);
+
+  const [inquiries, setInquiries] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const inquiryCollectionRef = collection(db, 'inquiries');
+
+    const qRecipient = query(inquiryCollectionRef, where('recipientId', '==', currentUser.uid));
+    const qStudent = query(inquiryCollectionRef, where('studentId', '==', currentUser.uid));
+
+    const mergeAndSortInquiries = (recipientDocs, studentDocs) => {
+      const recipientInquiries = recipientDocs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.timestamp ? data.timestamp.toDate() : null,
+        };
+      });
+
+      const studentInquiries = studentDocs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.timestamp ? data.timestamp.toDate() : null,
+        };
+      });
+
+      const combinedInquiries = [...recipientInquiries, ...studentInquiries];
+      combinedInquiries.sort((a, b) => b.date - a.date);
+
+      const uniqueInquiries = Array.from(
+        combinedInquiries.reduce((map, inquiry) => {
+          if (!map.has(inquiry.subject) || map.get(inquiry.subject).date < inquiry.date) {
+            map.set(inquiry.subject, {
+              ...inquiry,
+              date: inquiry.date ? inquiry.date.toLocaleString() : 'No Date',
+            });
+          }
+          return map;
+        }, new Map()).values()
+      );
+
+      return uniqueInquiries;
+    };
+
+    const unsubscribeRecipient = onSnapshot(qRecipient, async (snapshot) => {
+      const recipientDocs = snapshot.docs;
+      const studentSnapshot = await getDocs(qStudent);
+      const studentDocs = studentSnapshot.docs;
+
+      const mergedInquiries = mergeAndSortInquiries(recipientDocs, studentDocs);
+      setInquiries(mergedInquiries);
+    });
+
+    const unsubscribeStudent = onSnapshot(qStudent, async (snapshot) => {
+      const studentDocs = snapshot.docs;
+      const recipientSnapshot = await getDocs(qRecipient);
+      const recipientDocs = recipientSnapshot.docs;
+
+      const mergedInquiries = mergeAndSortInquiries(recipientDocs, studentDocs);
+      setInquiries(mergedInquiries);
+    });
+
+    return () => {
+      unsubscribeRecipient();
+      unsubscribeStudent();
+    };
+  }, [currentUser]);
 
   useEffect(() => {
     const fetchReplies = async () => {
@@ -136,10 +209,76 @@ function ViewMessagesStudent() {
     <SidebarStudent>
       <div className="container mx-auto p-4">
         <h2 className="text-2xl font-semibold mb-4">
-          Replies to Your Inquiries
+          Inquiries
         </h2>
 
-        {replies.length === 0 ? (
+        {inquiries.map(inquiry => (
+          <>
+            <motion.div className={`p-3 px-6 rounded-md my-3 shadow-md hover:cursor-pointer ${
+                          inquiry.studentId === currentUser.uid
+                            ? 'bg-[#fff6d4]'
+                            : inquiry.read
+                            ? 'bg-[#fff6d4]'
+                            : 'bg-[#bcc9fb] border-[#6176c0] border-2'
+                        }`}
+                whileHover={{scale: 1.03}}
+                whileTap={{scale: 0.95}}>
+              <div className="flex justify-between items-center">
+                <div className="w-[60%]">
+                  <span className="break-words font-bold text-lg">
+                    {inquiry.subject}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-sm">
+                    {moment(inquiry.timestamp.toDate()).startOf('hour').fromNow()}
+                  </span>
+                </div>
+
+              </div>
+
+              <div>
+                <span className="text-sm text-[#000000b6]">
+                  {inquiry.facultyEmail}
+                </span>
+              </div>
+              
+              <div className="">
+                <span className="text-lg">
+                  {inquiry.studentId === currentUser.uid ?(
+                    <>
+                      <span>
+                        You: {inquiry.message}
+                      </span>
+                    </>
+                  ): (
+                    <>
+                      {inquiry.message}
+                    </>
+
+                  )}
+                  
+                </span>
+              </div>
+
+              <div className="mt-3 flex justify-end">
+                  {inquiry.studentId === currentUser.uid ?(
+                    <span className="text-sm text-[#000000b6] font-medium">
+                    
+                    </span>
+                ): (
+                  <span className="text-sm text-[#000000b6] font-medium">
+                    {inquiry.read ? "Read" : "Unread"}
+                  </span>
+                )}
+              </div>
+
+            </motion.div>
+          </>
+        ))}
+
+        {/* {replies.length === 0 ? (
           <p>You have no replies yet.</p>
         ) : (
           <ul className="space-y-4">
@@ -251,7 +390,7 @@ function ViewMessagesStudent() {
               </button>
             </div>
           </div>
-        </Modal>
+        </Modal> */}
       </div>
     </SidebarStudent>
   );
