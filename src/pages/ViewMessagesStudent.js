@@ -98,6 +98,10 @@ function ViewMessagesStudent() {
     };
   }, [currentUser]);
 
+  const handleOpenModal = () => {
+    console.log("clicked!")
+  }
+
   useEffect(() => {
     const fetchReplies = async () => {
       if (!currentUser) return;
@@ -213,16 +217,16 @@ function ViewMessagesStudent() {
         </h2>
 
         {inquiries.map(inquiry => (
-          <>
-            <motion.div className={`p-3 px-6 rounded-md my-3 shadow-md hover:cursor-pointer ${
+          <div  key={inquiry.id}>
+            <motion.div onClick={handleOpenModal} className={`p-3 px-6 rounded-md my-3 shadow-md hover:cursor-pointer ${
                           inquiry.studentId === currentUser.uid
                             ? 'bg-[#fff6d4]'
                             : inquiry.read
                             ? 'bg-[#fff6d4]'
                             : 'bg-[#bcc9fb] border-[#6176c0] border-2'
                         }`}
-                whileHover={{scale: 1.03}}
-                whileTap={{scale: 0.95}}>
+                whileHover={{scale: 1.01}}
+                whileTap={{scale: 0.98}}>
               <div className="flex justify-between items-center">
                 <div className="w-[60%]">
                   <span className="break-words font-bold text-lg">
@@ -275,7 +279,7 @@ function ViewMessagesStudent() {
               </div>
 
             </motion.div>
-          </>
+          </div>
         ))}
 
         {/* {replies.length === 0 ? (

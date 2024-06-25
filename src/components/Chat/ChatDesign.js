@@ -81,7 +81,7 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
                 </button>
             </div>
 
-            <div className="bg-white flex-grow overflow-y-auto">
+            <div className="bg-white flex-grow overflow-y-auto pb-10">
                 <div className='pt-2'/>
                 {children}
             </div>
