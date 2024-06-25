@@ -937,7 +937,6 @@ const StudentClearance = () => {
 
                       ):(
                         <div className="flex justify-center">
-                          <p>Teacher UID: {teacherUID} dfdf</p>
                           <p>
                             Currently, there are no specific requirements for <strong>{selectedSubjectOffice}</strong>
                           </p>
