@@ -39,8 +39,20 @@ const ModalSubject = ({ children, handleClose, text }) => {
                 animate="visible"
                 exit="exit"
             >
-                <div className='flex-col items-center w-full'>
-                    <div className='w-full overflow-auto'>
+                <div className='flex-col items-center'>
+                    <div className=' '>
+                        {text &&(
+                        <div className='flex justify-center text-xl font-bold p-3'>
+                            <div className='bg-[#fff2c1] w-[80%] p-3 flex justify-center rounded-md'>
+                                <p className='text-[#494124] text-center'>
+                                    {text}
+                                </p>
+
+                            </div>
+                        </div>
+
+                        )}
+
                         {children}
 
                     </div>

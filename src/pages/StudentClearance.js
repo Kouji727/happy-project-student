@@ -26,6 +26,9 @@ import {
   faComments,
 
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  DocumentMagnifyingGlassIcon
+} from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 
 const SPECIAL_SUBJECTS = [
@@ -56,8 +59,26 @@ const StudentClearance = () => {
   const [isResubmitModalOpen, setIsResubmitModalOpen] = useState(false);
   const [subjectToResubmit, setSubjectToResubmit] = useState(null);
   const [submitType, setSubmitType] = useState(null);
+  const [ modalSubject, setModalSubject] = useState(null)
+  const [ modalSubjectOffice, setModalSubjectOffice] = useState(null)
+  const [ forOfficeUIDSubject, setForOfficeUIDSubject] = useState(null)
   const [inquiry, setInquiry] = useState(false);
   const [inquiryData, setInquiryData] = useState([]);
+  const [inquiryDataOffice, setInquiryDataOffice] = useState([]);
+  const [subjbectForInquiry, setsubjbectForInquiry] = useState(null)
+  const [teacherUID, setTeacherUID] = useState('');
+
+  const updateTeacherUID = () => {
+    const filteredRequirements = officeRequirements.filter(
+      (requirement) => requirement.office === forOfficeUIDSubject
+    );
+
+    if (filteredRequirements.length > 0) {
+      setTeacherUID(filteredRequirements[0].addedBy);
+    }
+
+  };
+  
 
   // Fetch Student Data
   useEffect(() => {
@@ -167,20 +188,24 @@ const StudentClearance = () => {
   }, [currentUser]);
   
 
-    const [ modalSubject, setModalSubject] = useState(null)
+
     const handleSubjectClick = (subject) => {
+      setsubjbectForInquiry(subject);
       setSubmitType('submit');
       setModalSubject(subject);
       setSelectedSubject(selectedSubject === subject ? null : subject);
       console.log(selectedSubject)
       };
 
-    const [ modalSubjectOffice, setModalSubjectOffice] = useState(null)
+
     const handleSubjectClickOffice = (subject) => {
+      setsubjbectForInquiry(subject);
       setSubmitType('submit');
       setModalSubjectOffice(subject);
       setSelectedSubjectOffice(selectedSubject === subject ? null : subject);
-      console.log(selectedSubjectOffice)
+      setForOfficeUIDSubject(subject);
+      // updateTeacherUID();
+      console.log(selectedSubjectOffice);
       };
 
   const handleFileChange = (e) => {
@@ -232,16 +257,23 @@ const StudentClearance = () => {
       } else if (type === 'office') {
         const officeRequirement = officeRequirements.find(req => req.office === subject);
         if (officeRequirement) {
-          await addDoc(clearanceRequestsRef, {
-            studentId: currentUser.uid,
-            studentName: studentData.fullName,
-            section: studentData.section,
-            subject: subject,
-            office: officeRequirement.office,
-            timestamp: serverTimestamp(),
-            fileURLs: fileURLs,
-            status: "pending",
-          });
+          try {
+            await addDoc(clearanceRequestsRef, {
+              studentId: currentUser.uid,
+              studentName: studentData.fullName,
+              section: studentData.section,
+              subject: subject,
+              office: officeRequirement.office,
+              timestamp: serverTimestamp(),
+              fileURLs: fileURLs,
+              status: "pending",
+            });
+          } catch (error) {
+            console.error("Error adding document: ", error);
+            // Handle the error here, e.g., show an alert to the user
+            alert("Failed to request clearance. Please try again later.");
+            return;
+          }
         } else {
           alert(
             "No requirements found for this office. You do not need to request clearance."
@@ -283,6 +315,8 @@ const StudentClearance = () => {
     setSubjectType(type);
     setSubjectToResubmit(subject);
     setIsResubmitModalOpen(true);
+    console.log(subject);
+    console.log(type);
   };
 
   const closeResubmitModal = () => {
@@ -290,7 +324,13 @@ const StudentClearance = () => {
     setIsResubmitModalOpen(false);
   };
 
-  const setInquiryModal = () => {
+
+  const [teacherUid, setTeacherUid] = useState(null)
+
+
+  const setInquiryModal = (uid) => {
+    updateTeacherUID();
+    setTeacherUid(uid);
     setInquiry(!inquiry);
   }
 
@@ -330,27 +370,33 @@ const StudentClearance = () => {
     const inquiryCollectionRef = collection(db, 'inquiries');
   
     const qRecipient = query(inquiryCollectionRef,
-      where('subject', '==', selectedSubject),
+      where('subject', '==', subjbectForInquiry),
       where('recipientId', '==', currentUser.uid)
     );
   
     const qStudent = query(inquiryCollectionRef,
-      where('subject', '==', selectedSubject),
+      where('subject', '==', subjbectForInquiry),
       where('studentId', '==', currentUser.uid)
     );
   
     const mergeAndSortInquiries = (recipientDocs, studentDocs) => {
-      const recipientInquiries = recipientDocs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        date: doc.data().timestamp.toDate()
-      }));
+      const recipientInquiries = recipientDocs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.timestamp ? data.timestamp.toDate() : null,
+        };
+      });
   
-      const studentInquiries = studentDocs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        date: doc.data().timestamp.toDate()
-      }));
+      const studentInquiries = studentDocs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.timestamp ? data.timestamp.toDate() : null,
+        };
+      });
   
       const combinedInquiries = [...recipientInquiries, ...studentInquiries];
       combinedInquiries.sort((a, b) => a.date - b.date);
@@ -359,7 +405,7 @@ const StudentClearance = () => {
         if (!acc.find(item => item.id === inquiry.id)) {
           acc.push({
             ...inquiry,
-            date: inquiry.date.toLocaleString()
+            date: inquiry.date ? inquiry.date.toLocaleString() : 'No Date',
           });
         }
         return acc;
@@ -390,7 +436,8 @@ const StudentClearance = () => {
       unsubscribeRecipient();
       unsubscribeStudent();
     };
-  }, [currentUser, selectedSubject]);
+  }, [currentUser, subjbectForInquiry]);
+    
   
   return (
     <SidebarStudent>
@@ -509,7 +556,10 @@ const StudentClearance = () => {
       </div>
 
       <Modal isOpen={isResubmitModalOpen} onClose={closeResubmitModal}>
-        <div className="p-6">
+        <motion.div className="p-6"
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}>
           <h3 className="text-lg font-semibold mb-4">
             Resubmit Clearance Request
           </h3>
@@ -532,7 +582,7 @@ const StudentClearance = () => {
               Resubmit
             </button>
           </div>
-        </div>
+        </motion.div>
       </Modal>
 
       <AnimatePresence
@@ -541,7 +591,7 @@ const StudentClearance = () => {
         onExitComplete={() => null}
         >
           {selectedSubject && (
-            <ModalSubject modalOpen={selectedSubject} handleClose={() => handleSubjectClick(null)}>
+            <ModalSubject text={selectedSubject} modalOpen={selectedSubject} handleClose={() => handleSubjectClick(null)}>
                 {/* Expandable Section for Requirements & Request */}
                 {selectedSubject === modalSubject &&
                       classRequirements[modalSubject] ? (     
@@ -551,10 +601,6 @@ const StudentClearance = () => {
                           <tbody>
                             <tr className="bg-white">
                               <td colSpan={3} className="border px-4 py-2">
-                                                                           {/* Ensure classRequirements[modalSubject] exists */}
-                {classRequirements[modalSubject] && (
-                  <p>Teacher UID: {classRequirements[modalSubject][0].teacherUid}</p>
-                )}
                                 {/* Requirements List */}
                                 <h4 className="text-md font-semibold">
                               Requirements:
@@ -602,17 +648,31 @@ const StudentClearance = () => {
                                       {clearanceRequests[modalSubject].status !==
                                         "approved" && (
 
-                                        <div className="items-center justify-center flex">
+                                        <div className="items-center justify-center flex flex-col sm:flex-row mt-2 gap-2 pt-2">
                                           <button
                                             onClick={() => openResubmitModal(modalSubject, 'class')}
-                                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
+                                            className="px-4 py-2 bg-yellow-500 text-white font-semibold rounded hover:bg-yellow-600 disabled:opacity-50 w-full"
                                             disabled={isUploading}
                                           >
                                             {isUploading
                                               ? "Resubmitting..."
                                               : "Resubmit Clearance"}
                                           </button>
-
+                                          
+                                            <input
+                                              type="file"
+                                              multiple
+                                              onChange={handleFileChange}
+                                              className={`p-2 my-2 text-sm rounded-lg cursor-pointer text-black font-semibold w-full
+                                                ${clearanceRequests[modalSubject].status ===
+                                                "approved"
+                                                  ? "bg-green-100 text-green-800"
+                                                  : clearanceRequests[modalSubject].status ===
+                                                    "rejected"
+                                                  ? "bg-red-100 text-red-800"
+                                                  : "bg-yellow-100 text-yellow-800"
+                                              }`}
+                                            />
                                         </div>
 
                                       )}
@@ -620,8 +680,9 @@ const StudentClearance = () => {
                                       {clearanceRequests[modalSubject].fileURLs &&
                                         clearanceRequests[modalSubject].fileURLs.length >
                                         0 ? (
-                                        <div className="mt-2">
-                                          <p className="text-sm font-medium text-gray-700">
+
+                                        <div className="mt-2 bg-gray-200 rounded-md">
+                                          <p className="text-sm font-medium text-black bg-gray-300 text-center p-2 rounded-md">
                                             Submitted Files:
                                           </p>
                                           <ul>
@@ -633,14 +694,16 @@ const StudentClearance = () => {
                                                   href={url}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
-                                                  className="text-blue-500 hover:underline"
+                                                  className="text-blue-500 hover:underline flex justify-center p-1"
                                                 >
+                                                  <DocumentMagnifyingGlassIcon className='w-7 h-7'/>
                                                   File {index + 1}
                                                 </a>
                                               </li>
                                             ))}
                                           </ul>
                                         </div>
+
                                       ) : null}
                                     </div>
                                   ) : (
@@ -649,21 +712,25 @@ const StudentClearance = () => {
                                         Optional: Submit Files (e.g., proof of
                                         payment, documents)
                                       </label>
-                                      <input
-                                        type="file"
-                                        multiple
-                                        onChange={handleFileChange}
-                                        className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                      />
+                                      <div className="items-center justify-center flex flex-col sm:flex-row gap-2">
+                                      
                                       <button
                                         onClick={() => handleRequestClearance(selectedSubject, 'class')}
-                                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                                        className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 disabled:opacity-50 w-full"
                                         disabled={isUploading}
                                       >
                                         {isUploading
                                           ? "Requesting..."
                                           : "Request Clearance"}
                                       </button>
+
+                                          <input
+                                            type="file"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="p-2 my-2 text-sm rounded-lg cursor-pointer font-semibold w-full bg-blue-200 text-blue-800"
+                                          />
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -677,7 +744,7 @@ const StudentClearance = () => {
                           <motion.div
                            whileHover={{scale: 1.03}}
                            whileTap={{scale: 0.95}}
-                           className="bg-white gap-2 flex p-2 px-10 justify-center items-center rounded-full hover:cursor-pointer" onClick={() => setInquiryModal()}>
+                           className="bg-white gap-2 flex p-2 px-10 justify-center items-center rounded-full hover:cursor-pointer" onClick={() => setInquiryModal(classRequirements[modalSubject][0].teacherUid)}>
                               <FontAwesomeIcon icon={faComments} className="text-[#5468b2] text-2xl"/>
                               <strong className="text-[#5468b2]">Send Inquiry</strong>
                           </motion.div>
@@ -704,19 +771,23 @@ const StudentClearance = () => {
           {/* For Offices */}
 
           {selectedSubjectOffice && (
-            <ModalSubject handleClose={() => handleSubjectClickOffice(null)}>
+            <ModalSubject text={selectedSubjectOffice} handleClose={() => handleSubjectClickOffice(null)}>
                     {/* Expandable Section for Office Requirements & Request */}
                     {selectedSubjectOffice === modalSubjectOffice &&
                       officeRequirements.some(
                         (requirement) => requirement.office === modalSubjectOffice
                       ) ? (
+
+                        <>
                         <table className="w-full">
                           <tbody>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-white">
                               <td colSpan={3} className="border px-4 py-2">
                                 {/* Office Requirements List */}
+
+
                                 <h4 className="text-md font-semibold">
-                                  Requirements:
+                                  Requirements: 
                                 </h4>
                                 <ul className="list-disc list-inside">
                                   {officeRequirements
@@ -735,63 +806,85 @@ const StudentClearance = () => {
                                 <div className="mt-4">
                                   {clearanceRequests[modalSubjectOffice] ? (
                                     <div>
-                                      <p className="mb-2">
-                                        <FontAwesomeIcon
-                                          icon={faExclamationCircle}
-                                          className={
-                                            clearanceRequests[modalSubjectOffice].status ===
-                                            "approved"
-                                              ? "text-green-500 mr-2"
-                                              : "text-yellow-500 mr-2"
-                                          }
-                                        />
-                                        Your clearance request is currently{" "}
-                                        <strong
-                                          className={
-                                            clearanceRequests[modalSubjectOffice].status ===
-                                            "approved"
-                                              ? "text-green-500"
-                                              : ""
-                                          }
-                                        >
-                                          {clearanceRequests[modalSubjectOffice].status}
-                                        </strong>
-                                        .
-                                      </p>
+                                      <div
+                                         className={`flex justify-center items-center p-2 px-5 rounded-full ${
+                                           clearanceRequests[modalSubjectOffice].status ===
+                                           "approved"
+                                             ? "bg-green-100 text-green-800"
+                                             : clearanceRequests[modalSubjectOffice].status ===
+                                               "rejected"
+                                             ? "bg-red-100 text-red-800"
+                                             : "bg-yellow-100 text-yellow-800"
+                                         }`}
+                                       >
+                                          <FontAwesomeIcon
+                                            icon={faExclamationCircle}
+                                            className="mr-2"
+                                          />
+                                          <span>
+                                            Your clearance request is currently{" "}
+                                            <strong>
+                                              {clearanceRequests[modalSubjectOffice].status}
+                                            </strong>
+                                            .
+                                          </span>
+                                        </div>
+
                                       {clearanceRequests[modalSubjectOffice].status !==
                                         "approved" && (
-                                        <button
-                                          onClick={() => openResubmitModal(modalSubjectOffice, 'office')}
-                                          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
-                                          disabled={isUploading}
-                                        >
-                                          {isUploading
-                                            ? "Resubmitting..."
-                                            : "Resubmit Clearance"}
-                                        </button>
+                                        <div className="items-center justify-center flex flex-col sm:flex-row mt-2 gap-2 pt-2">
+                                          <button
+                                            onClick={() => openResubmitModal(modalSubjectOffice, 'office')}
+                                            className="px-4 py-2 bg-yellow-500 text-white font-semibold rounded hover:bg-yellow-600 disabled:opacity-50 w-full"
+                                            disabled={isUploading}
+                                          >
+                                            {isUploading
+                                              ? "Resubmitting..."
+                                              : "Resubmit Clearance"}
+                                          </button>
+                                          
+                                            <input
+                                              type="file"
+                                              multiple
+                                              onChange={handleFileChange}
+                                              className={`p-2 my-2 text-sm rounded-lg cursor-pointer text-black font-semibold w-full
+                                                ${clearanceRequests[modalSubjectOffice].status ===
+                                                "approved"
+                                                  ? "bg-green-100 text-green-800"
+                                                  : clearanceRequests[modalSubjectOffice].status ===
+                                                    "rejected"
+                                                  ? "bg-red-100 text-red-800"
+                                                  : "bg-yellow-100 text-yellow-800"
+                                              }`}
+                                            />
+                                            
+
+
+                                        </div>
                                       )}
                                       {clearanceRequests[modalSubjectOffice].fileURLs &&
                                       clearanceRequests[modalSubjectOffice].fileURLs.length >
                                         0 ? (
-                                        <div className="mt-2">
-                                          <p className="text-sm font-medium text-gray-700">
+                                          <div className="mt-2 bg-gray-200 rounded-md">
+                                          <p className="text-sm font-medium text-black bg-gray-300 text-center p-2 rounded-md">
                                             Submitted Files:
                                           </p>
                                           <ul>
-                                            {clearanceRequests[modalSubjectOffice].fileURLs.map(
-                                              (url, index) => (
-                                                <li key={index}>
-                                                  <a
-                                                    href={url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-500 hover:underline"
-                                                  >
-                                                    File {index + 1}
-                                                  </a>
-                                                </li>
-                                              )
-                                            )}
+                                            {clearanceRequests[
+                                              modalSubjectOffice
+                                            ].fileURLs.map((url, index) => (
+                                              <li key={index}>
+                                                <a
+                                                  href={url}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-500 hover:underline flex justify-center p-1"
+                                                >
+                                                  <DocumentMagnifyingGlassIcon className='w-7 h-7'/>
+                                                  File {index + 1}
+                                                </a>
+                                              </li>
+                                            ))}
                                           </ul>
                                         </div>
                                       ) : null}
@@ -802,21 +895,25 @@ const StudentClearance = () => {
                                         Optional: Submit Files (e.g., proof of
                                         payment, documents)
                                       </label>
-                                      <input
-                                        type="file"
-                                        multiple
-                                        onChange={handleFileChange}
-                                        className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                      />
+                                      <div className="items-center justify-center flex flex-col sm:flex-row gap-2">
+                                      
                                       <button
                                         onClick={() => handleRequestClearance(selectedSubjectOffice, 'office')}
-                                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                                        className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 disabled:opacity-50 w-full"
                                         disabled={isUploading}
                                       >
                                         {isUploading
                                           ? "Requesting..."
                                           : "Request Clearance"}
                                       </button>
+
+                                          <input
+                                            type="file"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="p-2 my-2 text-sm rounded-lg cursor-pointer font-semibold w-full bg-blue-200 text-blue-800"
+                                          />
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -825,8 +922,23 @@ const StudentClearance = () => {
 
                           </tbody>
                         </table>
+
+                        <div className="flex justify-center p-2 w-full mt-3">
+                        <motion.div
+                        whileHover={{scale: 1.03}}
+                        whileTap={{scale: 0.95}}
+                        className="bg-white gap-2 flex p-2 px-10 justify-center items-center rounded-full hover:cursor-pointer" onClick={() => setInquiryModal(teacherUID)}>
+                            <FontAwesomeIcon icon={faComments} className="text-[#5468b2] text-2xl"/>
+                            <strong className="text-[#5468b2]">Send Inquiry</strong>
+                        </motion.div>
+
+                        </div>
+                        
+                        </>
+
                       ):(
                         <div className="flex justify-center">
+                          <p>Teacher UID: {teacherUID} dfdf</p>
                           <p>
                             Currently, there are no specific requirements for <strong>{selectedSubjectOffice}</strong>
                           </p>
@@ -840,21 +952,39 @@ const StudentClearance = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {inquiry && (
-            <ChatDesign handleClose={() => setInquiryModal()} subject={selectedSubject}>
+
+      {inquiry && (
+        <>
+          {selectedSubject && (
+            <ChatDesign handleClose={() => setInquiryModal(false)} subject={selectedSubject} facultyUid={teacherUid}>
               {inquiryData.map((inquiry) => (
                 <UserChatDesign
                   key={inquiry.id}
                   userType={inquiry.studentId === currentUser.uid ? "student" : "other"}
                   data={inquiry}
-
                 >
                   {inquiry.message}
                 </UserChatDesign>
               ))}
-
             </ChatDesign>
-        )}
+          )}
+          
+          {selectedSubjectOffice && (
+            <ChatDesign handleClose={() => setInquiryModal(false)} subject={selectedSubjectOffice} facultyUid={teacherUID}>
+              {inquiryData.map((inquiry) => (
+                <UserChatDesign
+                  key={inquiry.id}
+                  userType={inquiry.studentId === currentUser.uid ? "student" : "other"}
+                  data={inquiry}
+                >
+                  {inquiry.message}
+                </UserChatDesign>
+              ))}
+            </ChatDesign>
+          )}
+        </>
+      )}
+
 
       </AnimatePresence>
 
