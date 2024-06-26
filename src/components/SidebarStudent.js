@@ -65,8 +65,12 @@ export default function SidebarStudent({ children }) {
 
 useEffect(() => {
   const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setDropdownOpen(false); // Close the dropdown if clicked outside
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target) &&
+      event.target.closest('.dropdown-toggle') === null
+    ) {
+      setDropdownOpen(false);    
     }
   };
 
@@ -396,20 +400,20 @@ useEffect(() => {
                           
                           {dropdownOpen && (
                             <motion.div
-                              ref={dropdownRef}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.9 }}
-                              transition={{ duration: 0.2 }}
-                              className="absolute left-2 bottom-full mb-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5"
+                            ref={dropdownRef}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5"
+                          >
+                            <button
+                              className="dropdown-toggle block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                              onClick={handleLogout}
                             >
-                              <button
-                                onClick={handleLogout}
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                              >
-                                Logout
-                              </button>
-                            </motion.div>
+                              Logout
+                            </button>
+                          </motion.div>
                           )}
                         </div>
                       </li>
