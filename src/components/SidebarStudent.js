@@ -74,11 +74,9 @@ useEffect(() => {
     }
   };
 
-  // Add event listener when component mounts
   window.addEventListener('mousedown', handleClickOutside);
 
   return () => {
-    // Clean up the event listener when component unmounts
     window.removeEventListener('mousedown', handleClickOutside);
   };
 }, []);
