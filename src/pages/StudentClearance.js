@@ -441,7 +441,7 @@ const StudentClearance = () => {
   return (
     <SidebarStudent>
             <div className="container mx-auto  rounded pb-10">
-        <div className="bg-gray-200 p-5 rounded flex justify-center items-center">
+        <div className="bg-gray-200 mb-4 p-5 rounded flex justify-center items-center">
           <h2 className="text-xl font-bold text-black">Student Clearance</h2>
         </div>
 
@@ -500,7 +500,7 @@ const StudentClearance = () => {
         {/* Office Requirements Table */}
         {specialSubjects.length > 0 && (
           <div className="mt-8">
-                   <div className="bg-gray-200 p-5 rounded flex justify-center items-center">
+                   <div className="bg-gray-200 mb-4 p-5 rounded flex justify-center items-center">
           <h2 className="text-xl font-bold text-black">Office Requirements</h2>
         </div>
             <table className="min-w-full bg-white border border-gray-200">
