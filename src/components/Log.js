@@ -15,7 +15,7 @@ const Log = ({ type, subject, date }) => {
         <>
             {typeS !== null && (
                 typeS ? (
-                    <div className='bg-blue-100 mx-4 my-3 p-5 rounded-md'>
+                    <div className='bg-blue-300 mx-4 my-3 p-5 rounded-md shadow-md'>
                         <p className='text-lg font-bold'>
                             Request Submission
                         </p>
@@ -24,7 +24,7 @@ const Log = ({ type, subject, date }) => {
                         </p>
                     </div>
                 ) : (
-                    <div className='bg-yellow-100 mx-4 my-3 p-5 rounded-md'>
+                    <div className='bg-yellow-100 mx-4 my-3 p-5 rounded-md shadow-md'>
                         <p className='text-lg font-bold'>
                             Request Resubmission
                         </p>

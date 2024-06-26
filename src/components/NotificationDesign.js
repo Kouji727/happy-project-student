@@ -15,7 +15,7 @@ const NotificationDesign = ({ type, subject}) => {
         <>
             {typeS !== null && (
                 typeS ? (
-                    <div className='bg-green-100 mx-4 my-3 p-5 rounded-md'>
+                    <div className='bg-green-100 mx-4 my-3 p-5 rounded-md shadow-md'>
                         <p className='text-lg font-bold'>
                             Request Approved
                         </p>
@@ -24,7 +24,7 @@ const NotificationDesign = ({ type, subject}) => {
                         </p>
                     </div>
                 ) : (
-                    <div className='bg-red-100 mx-4 my-3 p-5 rounded-md'>
+                    <div className='bg-red-100 mx-4 my-3 p-5 rounded-md shadow-md'>
                         <p className='text-lg font-bold'>
                             Request Rejected
                         </p>

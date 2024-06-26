@@ -55,13 +55,17 @@ const Notifications = () => {
 
   return (
     <SidebarStudent>
-      <div className="container mx-auto p-4">
-        <h2 className="text-2xl font-semibold mb-4">Notification</h2>
+            <div className="container mx-auto bg-blue-100 rounded pb-10">
+        <div className="bg-blue-300 p-5 rounded flex justify-center items-center mb-10">
+          <h2 className="text-3xl font-bold text-blue-950">Notification</h2>
+        </div>
+
 
         <div className='max-h-[80vh] overflow-auto my-1'>
           {notification.map((item) => (
             <NotificationDesign key={item.id} type={item.status} subject={item.subject}/>
           ))}
+          
         </div>
       </div>
     </SidebarStudent>

@@ -43,6 +43,9 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
             message: message,
             fileURLs: inquiryFileURLs,
             timestamp: serverTimestamp(),
+            read: false,
+            fixedStudentId: currentUser.uid,
+            fixedFacultyId: facultyUid,
           });
     
           alert("Inquiry sent successfully!");
@@ -75,7 +78,7 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
         <div className="bg-[#1d1c8b] w-[90%] sm:w-[60%] h-[90%] sm:h-[80%] flex flex-col p-2 rounded-lg">
 
             <div className="bg-[#5468b2] p-4 text-white text-xl font-bold flex justify-between items-center w-full">
-                <span className='w-[80%] break-words'>Inquiry: {subject}</span>
+                <span className='w-[80%] break-words'>Inquiry: {subject} {facultyUid}</span>
                 <button className="bg-[#fce27c] text-[#7D703E] rounded-full w-10 h-10 flex justify-center items-center" onClick={handleClose}>
                     <XMarkIcon className='w-5 h-5 text-black'/>
                 </button>
