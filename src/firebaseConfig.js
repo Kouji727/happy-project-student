@@ -2,10 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getStorage } from "firebase/storage"; // Import getStorage
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
+import { getStorage } from "firebase/storage";
 // const apiKey = process.env.REACT_APP_API_KEY;
 
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useAuth } from '../components/AuthContext';
@@ -8,7 +8,7 @@ import {
   XMarkIcon,
   HomeIcon,
   DocumentDuplicateIcon,
-  CogIcon,
+  DocumentCheckIcon,
   ClipboardDocumentListIcon,
   BellIcon,
   InboxIcon,
@@ -19,7 +19,7 @@ import {
   BellAlertIcon
 } from "@heroicons/react/24/solid";
 
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -31,16 +31,16 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { Spinner } from "@chakra-ui/react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const auth = getAuth();
 const db = getFirestore();
 
 const initialNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
-  { name: "Clearance", href: "/student-clearance", icon: DocumentDuplicateIcon, current: false},
+  { name: "Clearance", href: "/student-clearance", icon: DocumentCheckIcon, current: false},
   { name: "Notification", href: "/notifications", icon: BellIcon, current: false},
-  { name: "Inbox", href: "/view-messages-student", icon: InboxIcon, current: false },
+  { name: "Messages", href: "/view-messages-student", icon: InboxIcon, current: false },
   { name: "Activity Log", href: "/activitylog", icon: ClipboardDocumentListIcon, current: false },
   { name: "Change Password", href: "/settings", icon: LockClosedIcon, current: false, children: [] },
 ];
@@ -59,6 +59,25 @@ export default function SidebarStudent({ children }) {
   const location = useLocation();
   const [notification, setNotification] = useState([]);
   const filteredItems = navigation.filter(item => item.name !== "Notification");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setDropdownOpen(false); // Close the dropdown if clicked outside
+    }
+  };
+
+  // Add event listener when component mounts
+  window.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    // Clean up the event listener when component unmounts
+    window.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -179,6 +198,32 @@ export default function SidebarStudent({ children }) {
   
     setNavigation(updatedNavigation);
   }, [location.pathname, notification, getUnreadNotification]);
+
+  const handleLogout = async () => {
+    try {
+      const auditLogsRef = collection(db, "auditLogs");
+      await addDoc(auditLogsRef, {
+        timestamp: serverTimestamp(),
+        userId: currentUser.uid,
+        actionType: "logout",
+        email: currentUser.email,
+      });
+
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
+  const getInitials = (email) => {
+    if (!email) return "";
+    const names = email.split("@")[0].split(/\.|_|-/);
+    return names
+      .map((n) => n[0].toUpperCase())
+      .slice(0, 2)
+      .join(""); // Get up to 2 initials
+  };
   
 
   return (
@@ -333,27 +378,48 @@ export default function SidebarStudent({ children }) {
                         </ul>
                       </li>
                       <li className="-mx-6 mt-auto">
-                        <a
-                          className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50"
+                        <div
+                          className="relative"
                         >
-                          <img
-                            className="h-8 w-8 rounded-full bg-gray-50 object-cover"
-                            src="https://images.unsplash.com/photo-1565945887714-d5139f4eb0ce?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                            alt="Profile"
-                          />
-                          <span className="sr-only">Your profile</span>
-                          <span aria-hidden="true">{userEmail}</span>
-                        </a>
-                        
-                        
+                          <button
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                            className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50 w-full"
+                          >
+                            <span className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-600">
+                              {getInitials(currentUser?.email || "User")}
+                            </span>
+                            <span className="sr-only">Your profile</span>
+                            <span aria-hidden="true">
+                              {currentUser?.email || "User"}{" "}
+                            </span>{" "}
+                          </button>
+                          
+                          {dropdownOpen && (
+                            <motion.div
+                              ref={dropdownRef}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute left-2 bottom-full mb-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5"
+                            >
+                              <button
+                                onClick={handleLogout}
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                              >
+                                Logout
+                              </button>
+                            </motion.div>
+                          )}
+                        </div>
                       </li>
-                      
                     </ul>
                   </nav>
                 )}
               </div>
             </div>
 
+            {/* Sidebar Hidden */}
             <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-blue-300 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
               <button
                 type="button"
@@ -382,14 +448,34 @@ export default function SidebarStudent({ children }) {
                 </motion.div>
               </a>
 
-              <a>
-                <span className="sr-only">Your profile</span>
-                <img
-                  className="h-8 w-8 rounded-full bg-gray-50"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
-              </a>
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center"
+                >
+                  <span className="sr-only">Your profile</span>
+                  <span className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-600">
+                    {getInitials(currentUser?.email || "User")}
+                  </span>
+                </button>
+                {dropdownOpen && (
+                  <motion.div
+                    ref={dropdownRef}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5"
+                  >
+                    <button
+                      onClick={handleLogout}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </div>
             </div>
             
 
