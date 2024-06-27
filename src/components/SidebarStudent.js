@@ -385,7 +385,7 @@ useEffect(() => {
                         >
                           <button
                             onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50 w-full"
+                            className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-blue-300 w-full"
                           >
                             <span className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-600">
                               {getInitials(currentUser?.email || "User")}
