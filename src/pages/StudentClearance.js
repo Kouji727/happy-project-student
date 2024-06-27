@@ -246,6 +246,7 @@ const StudentClearance = () => {
             timestamp: serverTimestamp(),
             fileURLs: fileURLs,
             status: "pending",
+            studentNo: studentData.studentId,
           });
         } else {
           alert(
@@ -262,10 +263,11 @@ const StudentClearance = () => {
               studentName: studentData.fullName,
               section: studentData.section,
               subject: subject,
-              office: officeRequirement.office,
+              officerId: officeRequirement.addedBy,
               timestamp: serverTimestamp(),
               fileURLs: fileURLs,
               status: "pending",
+              studentNo: studentData.studentId,
             });
           } catch (error) {
             console.error("Error adding document: ", error);
