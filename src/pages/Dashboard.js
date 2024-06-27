@@ -390,7 +390,7 @@ const Dashboard = () => {
             {/* Office Requirements Table */}
             {specialSubjects.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-xl font-semibold mb-4">Office Requirements</h3>
+                <h3 className="font-semibold mb-4">Office Requirements</h3>
                 <table className="min-w-full bg-white border border-gray-200">
                   <thead>
                     <tr>
