@@ -102,58 +102,6 @@ useEffect(() => {
     }
     return notification.filter(request => request.studentId === currentUser.uid && !request.isRead);
   }, [currentUser, notification]);
-  
-  // DELETE THIS AND REPLACE WITH MANUAL
-  // Generate Notification
-  useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
-
-    const clearanceCollectionRef = collection(db, 'clearanceRequests');
-    const q = query(
-      clearanceCollectionRef,
-      where('studentId', '==', currentUser.uid)
-    );
-
-    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const requestsData = [];
-      const newNotifications = [];
-
-      querySnapshot.forEach((doc) => {
-        const requestData = { ...doc.data(), id: doc.id };
-        if (requestData.status !== 'pending') {
-          requestsData.push(requestData);
-          newNotifications.push(requestData);
-        }
-      });
-
-      const notificationsCollectionRef = collection(db, 'studentNotification');
-      await Promise.all(newNotifications.map(async (item) => {
-        
-        const existingNotificationQuery = query(
-          notificationsCollectionRef,
-          where('studentId', '==', currentUser.uid),
-          where('subject', '==', item.subject),
-          where('timestamp', '==', item.timestamp)
-        );
-
-        const existingNotificationSnapshot = await getDocs(existingNotificationQuery);
-        if (existingNotificationSnapshot.empty) {
-          await addDoc(notificationsCollectionRef, {
-            studentId: currentUser.uid,
-            subject: item.subject,
-            status: item.status,
-            isRead: false,
-            timestamp: item.timestamp,
-            notifTimestamp: serverTimestamp(),
-          });
-        }
-      }));
-    });
-
-    return () => unsubscribe();
-  }, [currentUser]);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
