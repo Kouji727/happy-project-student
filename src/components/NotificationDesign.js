@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import moment from "moment";
 
-const NotificationDesign = ({ data, type, subject, timestamp, reason}) => {
+const NotificationDesign = ({ data, type}) => {
     const [typeS, setTypeS] = useState(null);
 
     useEffect(() => {
@@ -22,7 +22,7 @@ const NotificationDesign = ({ data, type, subject, timestamp, reason}) => {
         <>
             {typeS !== null && (
                 typeS ? (
-                    <div className='bg-green-100 mx-4 my-3 p-5 rounded-md shadow-md flex justify-between'>
+                    <div className='bg-green-100 mx-4 my-3 p-5 rounded-md shadow-md flex justify-between gap-2'>
                         <div className='flex justify-center items-center gap-3'>
                             <div>
                                 <div className='w-10 h-10 rounded-full bg-green-300 flex justify-center items-center font-bold text-green-950'>
@@ -42,15 +42,15 @@ const NotificationDesign = ({ data, type, subject, timestamp, reason}) => {
 
                         </div>
 
-                        <div className='w-[20%] justify-end flex'>
-                            <span className='break-words text-sm'>
+                        <div className='w-auto max-w-[20%] justify-end flex'>
+                            <span className='break-words text-sm w-full'>
                                 {moment(data.notifTimestamp.toDate()).fromNow()}
                             </span>
 
                         </div>
                     </div>
                 ) : (
-                    <div className='bg-red-100 mx-4 my-3 p-5 rounded-md shadow-md flex justify-between'>
+                    <div className='bg-red-100 mx-4 my-3 p-5 rounded-md shadow-md flex justify-between gap-2'>
                         <div className='flex justify-center items-center gap-3'>
                             <div>
                                 <div className='w-10 h-10 rounded-full bg-red-300 flex justify-center items-center font-bold text-red-950'>
@@ -67,9 +67,9 @@ const NotificationDesign = ({ data, type, subject, timestamp, reason}) => {
                                     Your request for <strong>{data.subject}</strong> was <strong>{data.status}</strong>
                                 </p>
 
-                                {reason && (
+                                {data.reason && (
                                     <p className='font-bold text-red-800'>
-                                        Reason: {reason}
+                                        Reason: {data.reason}
                                     </p>
 
                                 )}
@@ -79,8 +79,8 @@ const NotificationDesign = ({ data, type, subject, timestamp, reason}) => {
 
                         </div>
 
-                        <div className='w-[20%] justify-end flex'>
-                            <span className='break-words text-sm'>
+                        <div className='w-auto max-w-[20%] justify-end flex'>
+                            <span className='break-words text-sm w-full'>
                                 {moment(data.notifTimestamp.toDate()).fromNow()}
                             </span>
 
