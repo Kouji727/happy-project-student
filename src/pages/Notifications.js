@@ -12,7 +12,6 @@ import {
 
 import SidebarStudent from '../components/SidebarStudent';
 import NotificationDesign from '../components/NotificationDesign';
-import moment from "moment";
 
 const Notifications = () => {
   const { currentUser } = useAuth();
@@ -35,7 +34,6 @@ const Notifications = () => {
 
       const formattedNotif = notif.map((notifs) => ({
         ...notifs,
-        date: notifs.date ? new Date(notifs.date).toLocaleString() : null,
       }));
 
       setNotification(formattedNotif);
@@ -64,7 +62,7 @@ const Notifications = () => {
 
         <div className='max-h-[80vh] overflow-auto my-1'>
           {notification.map((item) => (
-            <NotificationDesign key={item.id} type={item.status} subject={item.subject} timestamp={item.date ? moment(item.date).fromNow() : null} reason={item.reason}/>
+            <NotificationDesign key={item.id} type={item.status} data={item}/>
           ))}
           
         </div>

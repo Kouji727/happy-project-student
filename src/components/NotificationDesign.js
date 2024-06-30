@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import moment from "moment";
 
-const NotificationDesign = ({ type, subject, timestamp, reason}) => {
+const NotificationDesign = ({ data, type, subject, timestamp, reason}) => {
     const [typeS, setTypeS] = useState(null);
 
     useEffect(() => {
@@ -26,7 +26,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
                         <div className='flex justify-center items-center gap-3'>
                             <div>
                                 <div className='w-10 h-10 rounded-full bg-green-300 flex justify-center items-center font-bold text-green-950'>
-                                    {getInitials(subject || "Subject")}
+                                    {getInitials(data.subject || "Subject")}
                                 </div>
                             </div>
 
@@ -35,7 +35,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
                                     Request Approved
                                 </p>
                                 <p>
-                                    Your request for <strong>{subject}</strong> was <strong>{type}</strong>
+                                    Your request for <strong>{data.subject}</strong> was <strong>{data.status}</strong>
                                 </p>
 
                             </div>
@@ -44,7 +44,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
 
                         <div className='w-[20%] justify-end flex'>
                             <span className='break-words text-sm'>
-                                {timestamp}
+                                {moment(data.notifTimestamp.toDate()).fromNow()}
                             </span>
 
                         </div>
@@ -54,7 +54,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
                         <div className='flex justify-center items-center gap-3'>
                             <div>
                                 <div className='w-10 h-10 rounded-full bg-red-300 flex justify-center items-center font-bold text-red-950'>
-                                    {getInitials(subject || "Subject")}
+                                    {getInitials(data.subject || "Subject")}
                                 </div>
 
                             </div>
@@ -64,7 +64,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
                                     Request Rejected
                                 </p>
                                 <p>
-                                    Your request for <strong>{subject}</strong> was <strong>{type}</strong>
+                                    Your request for <strong>{data.subject}</strong> was <strong>{data.status}</strong>
                                 </p>
 
                                 {reason && (
@@ -81,7 +81,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
 
                         <div className='w-[20%] justify-end flex'>
                             <span className='break-words text-sm'>
-                                {timestamp}
+                                {moment(data.notifTimestamp.toDate()).fromNow()}
                             </span>
 
                         </div>
