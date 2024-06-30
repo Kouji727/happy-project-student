@@ -109,14 +109,14 @@ const StudentClearance = () => {
   //Fetch Reject Reason
   useEffect(() => {
     
-    if (!currentUser || !selectedSubject) return;
+    if (!currentUser || !subjbectForInquiry) return;
   
     const fetchRejectReason = async () => {
       try {
         const studentsRef = collection(db, "studentNotification");
         const q = query(studentsRef, 
           where("studentId", "==", currentUser.uid), 
-          where("subject", "==", selectedSubject)
+          where("subject", "==", subjbectForInquiry)
         );
   
         const querySnapshot = await getDocs(q);
@@ -136,12 +136,14 @@ const StudentClearance = () => {
   
       } catch (error) {
         console.error("Error fetching reject reason data:", error);
+      } finally {
+        console.log(reason)
       }
     };
   
     fetchRejectReason();
   
-  }, [currentUser, selectedSubject]);
+  }, [currentUser, subjbectForInquiry]);
   
   
   // Fetch Class Requirement based on section
@@ -873,13 +875,22 @@ const StudentClearance = () => {
                                             icon={faExclamationCircle}
                                             className="mr-2"
                                           />
-                                          <span>
-                                            Your clearance request is currently{" "}
-                                            <strong>
-                                              {clearanceRequests[modalSubjectOffice].status}
-                                            </strong>
-                                            .
-                                          </span>
+                                          <div>
+                                            <span>
+                                              Your clearance request is currently{" "}
+                                              <strong>
+                                                {clearanceRequests[modalSubjectOffice].status}
+                                              </strong>
+                                            </span>
+
+                                            {reason?.reason && (
+                                              <p>
+                                                <span className="font-bold">Reason: </span> {reason.reason}
+                                              </p>
+
+                                            )}
+
+                                          </div>
                                         </div>
 
                                       {clearanceRequests[modalSubjectOffice].status !==
