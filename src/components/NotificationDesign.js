@@ -67,9 +67,13 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
                                     Your request for <strong>{subject}</strong> was <strong>{type}</strong>
                                 </p>
 
-                                <p className='font-bold text-red-800'>
-                                    Reason: {reason}
-                                </p>
+                                {reason && (
+                                    <p className='font-bold text-red-800'>
+                                        Reason: {reason}
+                                    </p>
+
+                                )}
+
 
                             </div>
 
