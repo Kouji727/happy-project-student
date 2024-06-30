@@ -363,7 +363,7 @@ useEffect(() => {
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                             className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-blue-300 w-full transition"
                           >
-                            <span className="h-8 w-8 flex items-center justify-center rounded-full bg-[#ffeca4] text-xl font-bold text-[#728cee]">
+                            <span className="h-8 w-8 flex items-center justify-center rounded-full bg-[#ffeca4] text-xl font-bold text-blue-400">
                               {getInitials(currentUser?.email || "User")}
                             </span>
                             <span className="sr-only">Your profile</span>
@@ -447,7 +447,7 @@ useEffect(() => {
                   className="flex items-center"
                 >
                   <span className="sr-only">Your profile</span>
-                  <span className="h-8 w-8 flex items-center justify-center rounded-full bg-[#ffeca4] text-xl font-bold text-[#728cee]">
+                  <span className="h-8 w-8 flex items-center justify-center rounded-full bg-[#ffeca4] text-xl font-bold text-blue-400">
                     {getInitials(currentUser?.email || "User")}
                   </span>
                 </button>
