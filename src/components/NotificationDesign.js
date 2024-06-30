@@ -44,7 +44,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
 
                         <div className='w-[20%] justify-end flex'>
                             <span className='break-words text-sm'>
-                                {moment(timestamp).fromNow()}
+                                {timestamp}
                             </span>
 
                         </div>
@@ -81,7 +81,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
 
                         <div className='w-[20%] justify-end flex'>
                             <span className='break-words text-sm'>
-                                {moment(timestamp).fromNow()}
+                                {timestamp}
                             </span>
 
                         </div>
