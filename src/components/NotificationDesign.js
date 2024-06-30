@@ -14,7 +14,7 @@ const NotificationDesign = ({ type, subject, timestamp, reason}) => {
 
     const getInitials = (initial) => {
         if (!initial) return "";
-        return initial[0].toUpperCase(); // Return the first letter in uppercase
+        return initial[0].toUpperCase();
     };
     
 
