@@ -35,7 +35,7 @@ const ForgotPassword = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white p-8 rounded-lg shadow-md max-w-md w-full"
+        className="bg-white p-8 rounded-lg shadow-md w-[90%] sm:max-w-md"
       >
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Forgot Password</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

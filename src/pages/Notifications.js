@@ -63,7 +63,7 @@ const Notifications = () => {
 
         <div className='max-h-[80vh] overflow-auto my-1'>
           {notification.map((item) => (
-            <NotificationDesign key={item.id} type={item.status} subject={item.subject}/>
+            <NotificationDesign key={item.id} type={item.status} subject={item.subject} timestamp={item.date} reason={item.reason}/>
           ))}
           
         </div>

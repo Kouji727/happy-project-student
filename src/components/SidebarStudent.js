@@ -7,7 +7,6 @@ import {
   Bars3Icon,
   XMarkIcon,
   HomeIcon,
-  DocumentDuplicateIcon,
   DocumentCheckIcon,
   ClipboardDocumentListIcon,
   BellIcon,
@@ -16,7 +15,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 import {
-  BellAlertIcon
+  BellAlertIcon,
+  InboxStackIcon
 } from "@heroicons/react/24/solid";
 
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
@@ -58,7 +58,8 @@ export default function SidebarStudent({ children }) {
   const [navigation, setNavigation] = useState(initialNavigation);
   const location = useLocation();
   const [notification, setNotification] = useState([]);
-  const filteredItems = navigation.filter(item => item.name !== "Notification");
+  const [messages, setMessages] = useState([]);
+  const filteredItems = navigation.filter(item => item.name !== "Notification" && item.name !== "Messages");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -81,27 +82,48 @@ useEffect(() => {
   };
 }, []);
 
-  useEffect(() => {
-    if (!currentUser) return;
-  
-    const notifCollectionRef = collection(db, 'studentNotification');
-    const q = query(notifCollectionRef, where("studentId", "==", currentUser.uid));
-  
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+useEffect(() => {
+  if (!currentUser) return;
+
+  const notifCollectionRef = collection(db, 'studentNotification');
+  const q = query(notifCollectionRef, 
+    where("studentId", "==", currentUser.uid), 
+    where("isRead", "==", false)
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    if (!snapshot.empty) {
       const notifications = snapshot.docs.map((doc) => doc.data());
       setNotification(notifications);
-    });
-  
-    return () => unsubscribe();
-  }, [currentUser]);  
-
-  // Filter unread clearance requests
-  const getUnreadNotification = useCallback(() => {
-    if (!currentUser) {
-      return [];
+    } else {
+      setNotification([]);
     }
-    return notification.filter(request => request.studentId === currentUser.uid && !request.isRead);
-  }, [currentUser, notification]);
+  });
+
+  return () => unsubscribe();
+}, [currentUser]);
+
+useEffect(() => {
+  if (!currentUser) return;
+
+  const msgCollectionRef = collection(db, 'inquiries');
+  const q = query(msgCollectionRef, 
+    where("recipientId", "==", currentUser.uid), 
+    where("read", "==", false)
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    if (!snapshot.empty) {
+      const messages = snapshot.docs.map((doc) => doc.data());
+      setMessages(messages);
+    } else {
+      setMessages([]);
+    }
+  });
+
+  return () => unsubscribe();
+}, [currentUser]);
+
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -129,13 +151,18 @@ useEffect(() => {
     });
   }, [userRole]);
 
-  // ADD INBOX HERE
   useEffect(() => {
     const updatedNavigation = initialNavigation.map((item) => {
       if (item.name === "Notification") {
         return {
           ...item,
-          icon: getUnreadNotification().length > 0 ? BellAlertIcon : BellIcon,
+          icon: notification.length > 0 ? BellAlertIcon : BellIcon,
+          current: item.href === location.pathname,
+        };
+      } else if (item.name === "Messages") {
+        return {
+          ...item,
+          icon: messages.length > 0 ? InboxStackIcon : InboxIcon,
           current: item.href === location.pathname,
         };
       } else {
@@ -147,7 +174,8 @@ useEffect(() => {
     });
   
     setNavigation(updatedNavigation);
-  }, [location.pathname, notification, getUnreadNotification]);
+  }, [location.pathname, notification, messages]);
+  
 
   const handleLogout = async () => {
     try {
@@ -172,7 +200,7 @@ useEffect(() => {
     return names
       .map((n) => n[0].toUpperCase())
       .slice(0, 2)
-      .join(""); // Get up to 2 initials
+      .join("");
   };
   
 
@@ -333,9 +361,9 @@ useEffect(() => {
                         >
                           <button
                             onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-blue-300 w-full"
+                            className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-blue-300 w-full transition"
                           >
-                            <span className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-600">
+                            <span className="h-8 w-8 flex items-center justify-center rounded-full bg-[#ffeca4] text-xl font-bold text-[#728cee]">
                               {getInitials(currentUser?.email || "User")}
                             </span>
                             <span className="sr-only">Your profile</span>
@@ -390,10 +418,25 @@ useEffect(() => {
                   whileTap={{scale: 0.80}}
                   
                   className="flex items-center rounded-full p-1 text-sm font-semibold text-gray-800">
-                    {getUnreadNotification().length > 0 ? (
+                    {notification.length > 0 ? (
                       <BellAlertIcon className="h-6 w-6 text-red-400" />
                     ) : (
                       <BellIcon className="h-6 w-6" />
+                    )}
+                </motion.div>
+              </a>
+
+              <a href="/view-messages-student">
+                <span className="sr-only">Messages</span>
+                  <motion.div 
+                  whileHover={{scale: 1.1, backgroundColor: '#eeeee4'}}
+                  whileTap={{scale: 0.80}}
+                  
+                  className="flex items-center rounded-full p-1 text-sm font-semibold text-gray-800">
+                    {messages.length > 0 ? (
+                      <InboxStackIcon className="h-6 w-6 text-red-400" />
+                    ) : (
+                      <InboxIcon className="h-6 w-6" />
                     )}
                 </motion.div>
               </a>
@@ -404,7 +447,7 @@ useEffect(() => {
                   className="flex items-center"
                 >
                   <span className="sr-only">Your profile</span>
-                  <span className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-600">
+                  <span className="h-8 w-8 flex items-center justify-center rounded-full bg-[#ffeca4] text-xl font-bold text-[#728cee]">
                     {getInitials(currentUser?.email || "User")}
                   </span>
                 </button>

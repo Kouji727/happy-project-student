@@ -213,6 +213,10 @@ function ViewMessagesStudent() {
     markAsRead();
   }
 
+  const getInitials = (initial) => {
+    if (!initial) return "";
+    return initial[0].toUpperCase();
+};
 
   return (
     <SidebarStudent>
@@ -224,7 +228,7 @@ function ViewMessagesStudent() {
 
         {inquiries.map(inquiry => (
           <div key={inquiry.id} className="px-5">
-            <motion.div onClick={() => handleOpenModal(inquiry.subject, inquiry.fixedFacultyId)} className={`p-3 px-6 rounded-md my-3 shadow-md hover:cursor-pointer ${
+            <motion.div onClick={() => handleOpenModal(inquiry.subject, inquiry.fixedFacultyId)} className={`p-3 px-6 rounded-md my-3 shadow-md hover:cursor-pointer flex items-center gap-3 ${
               inquiry.studentId === currentUser.uid
                 ? 'bg-[#fff6d4]'
                 : inquiry.read
@@ -233,71 +237,82 @@ function ViewMessagesStudent() {
             }`}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}>
-              <div className="flex justify-between items-center">
-                <div className="w-[60%]">
-                  <span className="break-words font-bold text-lg">
-                    {inquiry.subject}
-                  </span>
+
+                
+              <div className="text-xl font-bold text-blue-950">
+                <div className="bg-blue-300 w-14 h-14 flex justify-center items-center rounded-full shadow-md">
+                  {getInitials(inquiry.subject || "Subject")}
+                </div>
+              </div>
+
+              <div className=" w-full">
+                <div className="flex justify-between items-cente">
+                  <div className="w-[60%]">
+                    <span className="break-words font-bold text-lg">
+                      {inquiry.subject}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-sm">
+                      {moment(inquiry.timestamp.toDate()).fromNow()}
+                    </span>
+                  </div>
+
                 </div>
 
                 <div>
-                  <span className="text-sm">
-                    {moment(inquiry.timestamp.toDate()).fromNow()}
+                  <span className="text-sm text-[#000000b6]">
+                    {inquiry.facultyEmail}
+                  </span>
+                </div>
+
+                <div className="">
+                  <span className="text-lg">
+                    {inquiry && inquiry.fileURLs && inquiry.fileURLs.map((url, index) => (
+                        <div key={index} className='pb-2'>
+                                <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[#1d1c8b] hover:underline flex items-center"
+                                >
+                                <DocumentMagnifyingGlassIcon className='w-7 h-7'/>
+
+
+                                    File {index + 1}
+                                </a>
+                        </div>
+                    ))}
+                    {inquiry.studentId === currentUser.uid ? (
+                      <>
+                        <span>
+                          You: {inquiry.message}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        {inquiry.message}
+                      </>
+
+                    )}
 
                   </span>
                 </div>
 
-              </div>
-
-              <div>
-                <span className="text-sm text-[#000000b6]">
-                  {inquiry.facultyEmail}
-                </span>
-              </div>
-
-              <div className="">
-                <span className="text-lg">
-                   {inquiry && inquiry.fileURLs && inquiry.fileURLs.map((url, index) => (
-                       <div key={index} className='pb-2'>
-                               <a
-                                   href={url}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   className="text-[#1d1c8b] hover:underline flex items-center"
-                               >
-                               <DocumentMagnifyingGlassIcon className='w-7 h-7'/>
-
-
-                                   File {index + 1}
-                               </a>
-                       </div>
-                   ))}
+                <div className="mt-3 flex justify-end">
                   {inquiry.studentId === currentUser.uid ? (
-                    <>
-                      <span>
-                        You: {inquiry.message}
-                      </span>
-                    </>
+                    <span className="text-sm text-[#000000b6] font-medium">
+                      {inquiry.read ? "Read" : "Unread"}
+                    </span>
                   ) : (
                     <>
-                      {inquiry.message}
                     </>
-
                   )}
+                </div>
 
-                </span>
               </div>
 
-              <div className="mt-3 flex justify-end">
-                {inquiry.studentId === currentUser.uid ? (
-                  <>
-                  </>
-                ) : (
-                  <span className="text-sm text-[#000000b6] font-medium">
-                    {inquiry.read ? "Read" : "Unread"}
-                  </span>
-                )}
-              </div>
 
             </motion.div>
           </div>

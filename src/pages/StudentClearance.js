@@ -15,6 +15,8 @@ import {
   doc,
   deleteDoc, 
   onSnapshot,
+  orderBy,
+  limit,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import SidebarStudent from "../components/SidebarStudent";
@@ -66,6 +68,7 @@ const StudentClearance = () => {
   const [inquiryData, setInquiryData] = useState([]);
   const [subjbectForInquiry, setsubjbectForInquiry] = useState(null)
   const [teacherUID, setTeacherUID] = useState('');
+  const [reason, setReason] = useState(null);
 
   const updateTeacherUID = () => {
     const filteredRequirements = officeRequirements.filter(
@@ -104,9 +107,51 @@ const StudentClearance = () => {
 
     fetchStudentData();
   }, [currentUser, setStudentData]);
+
+  //Fetch Reject Reason
+  useEffect(() => {
+    
+    if (!currentUser || !selectedSubject) return;
   
-
-
+    const fetchRejectReason = async () => {
+      try {
+        const studentsRef = collection(db, "studentNotification");
+        const q = query(studentsRef, 
+          where("studentId", "==", currentUser.uid), 
+          where("subject", "==", selectedSubject)
+        );
+  
+        const querySnapshot = await getDocs(q);
+  
+        // Get all documents and convert to an array
+        const documents = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+  
+        // Sort documents by notifTimestamp in descending order
+        documents.sort((a, b) => (b.notifTimestamp || 0) - (a.notifTimestamp || 0));
+  
+        // Set the reason based on the sorted documents
+        if (documents.length > 0) {
+          setReason(documents[0]); // Assuming you want the latest one
+        } else {
+          setReason(null); // Handle case where no documents are found
+        }
+  
+      } catch (error) {
+        console.error("Error fetching reject reason data:", error);
+      } finally{
+        console.log(reason)
+      }
+    };
+  
+    fetchRejectReason();
+  
+  }, [currentUser, selectedSubject]);
+  
+  
+  
   // Fetch Class Requirement based on section
   useEffect(() => {
     const fetchClassRequirements = async () => {
@@ -189,6 +234,7 @@ const StudentClearance = () => {
 
 
     const handleSubjectClick = (subject) => {
+
       setsubjbectForInquiry(subject);
       setSubmitType('submit');
       setModalSubject(subject);
@@ -198,6 +244,7 @@ const StudentClearance = () => {
 
 
     const handleSubjectClickOffice = (subject) => {
+
       setsubjbectForInquiry(subject);
       setSubmitType('submit');
       setModalSubjectOffice(subject);
@@ -640,13 +687,22 @@ const StudentClearance = () => {
                                             icon={faExclamationCircle}
                                             className="mr-2"
                                           />
-                                          <span>
-                                            Your clearance request is currently{" "}
-                                            <strong>
-                                              {clearanceRequests[modalSubject].status}
-                                            </strong>
-                                            .
-                                          </span>
+                                          <div>
+                                            <span>
+                                              Your clearance request is currently{" "}
+                                              <strong>
+                                                {clearanceRequests[modalSubject].status}
+                                              </strong>
+                                            </span>
+                                            
+                                            {reason?.reason && (
+                                              <p>
+                                                <span className="font-bold">Reason: </span> {reason.reason}
+                                              </p>
+
+                                            )}
+
+                                          </div>
                                         </div>
 
                                       {clearanceRequests[modalSubject].status !==
