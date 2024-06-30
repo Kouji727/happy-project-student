@@ -15,8 +15,6 @@ import {
   doc,
   deleteDoc, 
   onSnapshot,
-  orderBy,
-  limit,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import SidebarStudent from "../components/SidebarStudent";
@@ -123,33 +121,27 @@ const StudentClearance = () => {
   
         const querySnapshot = await getDocs(q);
   
-        // Get all documents and convert to an array
         const documents = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
   
-        // Sort documents by notifTimestamp in descending order
         documents.sort((a, b) => (b.notifTimestamp || 0) - (a.notifTimestamp || 0));
   
-        // Set the reason based on the sorted documents
         if (documents.length > 0) {
-          setReason(documents[0]); // Assuming you want the latest one
+          setReason(documents[0]);
         } else {
-          setReason(null); // Handle case where no documents are found
+          setReason(null);
         }
   
       } catch (error) {
         console.error("Error fetching reject reason data:", error);
-      } finally{
-        console.log(reason)
       }
     };
   
     fetchRejectReason();
   
   }, [currentUser, selectedSubject]);
-  
   
   
   // Fetch Class Requirement based on section
