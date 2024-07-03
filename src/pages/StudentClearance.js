@@ -70,8 +70,6 @@ const StudentClearance = () => {
   const [subjbectForInquiry, setsubjbectForInquiry] = useState(null)
   const [teacherUID, setTeacherUID] = useState('');
   const [reason, setReason] = useState(null);
-  const [alertMsg, setAlertMsg] = useState(null);
-  const [errAlertMsg, setErrAlertMsg] = useState(null);
 
   const updateTeacherUID = () => {
     const filteredRequirements = officeRequirements.filter(
@@ -293,12 +291,9 @@ const StudentClearance = () => {
             status: "pending",
             studentNo: studentData.studentId,
           });
-          setAlertMsg("Clearance Requested Successfully");
-          showSuccessToast();
+          showSuccessToast("Clearance Requested Successfully");
         } else {
-          alert(
-            "No requirements found for this subject. You do not need to request clearance."
-          );
+          showWarningToast("No requirements found for this subject. You do not need to request clearance");
           return;
         }
       } else if (type === 'office') {
@@ -316,19 +311,15 @@ const StudentClearance = () => {
               status: "pending",
               studentNo: studentData.studentId,
             });
-            setAlertMsg("Clearance Requested Successfully");
-            showSuccessToast();
+            showSuccessToast("Clearance Requested Successfully");
 
           } catch (error) {
             console.error("Error adding document: ", error);
-            setErrAlertMsg("Failed to request clearance. Please try again later")
-            showFailedToast();
+            showFailedToast("Failed to request clearance. Please try again later");
             return;
           }
         } else {
-          alert(
-            "No requirements found for this office. You do not need to request clearance."
-          );
+          showWarningToast("No requirements found for this office. You do not need to request clearance");
           return;
         }
       } else {
@@ -395,8 +386,7 @@ const StudentClearance = () => {
   
       await handleRequestClearance(subject, type);
     } catch (error) {
-      setErrAlertMsg("Error resubmitting clearance. Please try again later")
-      showFailedToast();
+      showFailedToast("Error resubmitting clearance. Please try again later");
       console.error("Error resubmitting clearance:", error);
     }
   };
@@ -488,7 +478,7 @@ const StudentClearance = () => {
     };
   }, [currentUser, subjbectForInquiry]);
 
-  const showSuccessToast = () => toast.success(alertMsg, {
+  const showSuccessToast = (msg) => toast.success(msg, {
     position: "top-center",
     autoClose: 2500,
     hideProgressBar: false,
@@ -500,7 +490,7 @@ const StudentClearance = () => {
     transition: Bounce,
     });
 
-    const showFailedToast = () => toast.error(errAlertMsg, {
+    const showFailedToast = (msg) => toast.error(msg, {
       position: "top-center",
       autoClose: 2500,
       hideProgressBar: false,
@@ -511,6 +501,18 @@ const StudentClearance = () => {
       theme: "colored",
       transition: Bounce,
       });
+
+      const showWarningToast = (msg) => toast.warn(msg, {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+        });
 
     
   

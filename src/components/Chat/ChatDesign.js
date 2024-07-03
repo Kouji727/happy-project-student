@@ -20,13 +20,40 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
     const { currentUser } = useAuth();
     const [message, setMessage] = useState('');
     const [inquiryFiles, setInquiryFiles] = useState([]);
-    
+    const [alertMsg, setAlertMsg] = useState(null);
+    const [errAlertMsg, setErrAlertMsg] = useState(null);
+
+    const showSuccessToast = (msg) => toast.success(msg, {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      });
+  
+      const showFailedToast = (msg) => toast.error(msg, {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+        });
+
 
     const handleInquiryFileChange = (e) => {
         setInquiryFiles(Array.from(e.target.files));
       };
 
     const handleSendInquiry = async () => {
+
         try {
           const inquiryFileURLs = [];
           for (const file of inquiryFiles) {
@@ -51,13 +78,12 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
             fixedStudentId: currentUser.uid,
             fixedFacultyId: facultyUid,
           });
-    
-          alert("Inquiry sent successfully!");
-          setMessage("");
+          showSuccessToast("Inquiry Sent Successfully");
           setInquiryFiles([]);
+          setMessage("");
         } catch (error) {
           console.error("Error sending inquiry:", error);
-          alert("Error sending inquiry. Please try again later.");
+          showFailedToast("Error sending inquiry. Please try again later");
         }
       };
 
