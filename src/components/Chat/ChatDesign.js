@@ -20,8 +20,6 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
     const { currentUser } = useAuth();
     const [message, setMessage] = useState('');
     const [inquiryFiles, setInquiryFiles] = useState([]);
-    const [alertMsg, setAlertMsg] = useState(null);
-    const [errAlertMsg, setErrAlertMsg] = useState(null);
 
     const showSuccessToast = (msg) => toast.success(msg, {
       position: "top-center",
@@ -78,7 +76,6 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
             fixedStudentId: currentUser.uid,
             fixedFacultyId: facultyUid,
           });
-          showSuccessToast("Inquiry Sent Successfully");
           setInquiryFiles([]);
           setMessage("");
         } catch (error) {
@@ -105,6 +102,7 @@ const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
 
   return (
     <Backdrop>
+      <ToastContainer/>
         <div className="bg-[#1d1c8b] w-[90%] sm:w-[60%] h-[90%] sm:h-[80%] flex flex-col p-2 rounded-lg">
 
             <div className="bg-[#5468b2] p-4 text-white text-xl font-bold flex justify-between items-center w-full">

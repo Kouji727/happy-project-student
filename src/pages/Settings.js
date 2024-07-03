@@ -3,6 +3,9 @@ import SidebarStudent from '../components/SidebarStudent';
 import { getAuth, signInWithEmailAndPassword, updatePassword } from 'firebase/auth';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const Settings = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -13,16 +16,53 @@ const Settings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
+  const showSuccessToast = (msg) => toast.success(msg, {
+    position: "top-center",
+    autoClose: 2500,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+    });
+
+    const showFailedToast = (msg) => toast.error(msg, {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      });
+
+      const showWarningToast = (msg) => toast.warn(msg, {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+        });
+
+
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
     if (newPassword.length < 6) {
-      setAlertMessage('Password must be at least 6 characters long.');
+      showWarningToast('Password must be at least 6 characters long');
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      setAlertMessage('New passwords do not match.');
+      showWarningToast('New passwords do not match');
       return;
     }
 
@@ -32,14 +72,21 @@ const Settings = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, user.email, currentPassword);
       await updatePassword(userCredential.user, newPassword);
-      setAlertMessage('Password changed successfully.');
+      showSuccessToast('Password changed successfully')
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
     } catch (error) {
-      setAlertMessage(`Error: ${error.message}`);
+      showFailedToast(error.message);
+    } finally {
+
     }
   };
 
   return (
     <SidebarStudent>
+      <ToastContainer/>
       <div className="container mx-auto bg-blue-100 rounded pb-20">
         
         <div className="bg-blue-300 p-5 rounded flex justify-center items-center mb-10">
@@ -71,7 +118,7 @@ const Settings = () => {
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                   className="absolute right-2 top-2 text-blue-500"
                 >
-                  {showCurrentPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  {showCurrentPassword ? <EyeIcon className="h-5 w-5" /> : <EyeSlashIcon className="h-5 w-5" />}
                 </button>
               
               </div>
@@ -98,7 +145,7 @@ const Settings = () => {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute right-2 top-2 text-blue-500"
                   >
-                    {showNewPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                    {showNewPassword ? <EyeIcon className="h-5 w-5" /> : <EyeSlashIcon className="h-5 w-5" /> }
                   </button>
                 </div>
 
@@ -124,7 +171,7 @@ const Settings = () => {
                     onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
                     className="absolute right-2 top-2 text-blue-500"
                   >
-                    {showConfirmNewPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                    {showConfirmNewPassword ? <EyeIcon className="h-5 w-5" /> : <EyeSlashIcon className="h-5 w-5" /> }
                   </button>
 
                 </div>

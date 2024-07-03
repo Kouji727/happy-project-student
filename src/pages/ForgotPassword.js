@@ -4,12 +4,40 @@ import { auth } from '../firebaseConfig';
 import { motion } from 'framer-motion';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  const showSuccessToast = (msg) => toast.success(msg, {
+    position: "top-center",
+    autoClose: 2500,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+    });
+
+    const showFailedToast = (msg) => toast.error(msg, {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      });
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +47,9 @@ const ForgotPassword = () => {
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setMessage('Password reset email sent. Please check your inbox.');
+      showSuccessToast("Password reset email sent. Please check your inbox");
     } catch (error) {
-      setError('Failed to send password reset email. Please try again.');
+      showFailedToast("Failed to send password reset email. Please try again");
       console.error('Error sending password reset email:', error);
     } finally {
       setIsLoading(false);
@@ -30,7 +58,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100" style={{ backgroundImage: "url('https://scontent.fcrk3-2.fna.fbcdn.net/v/t1.6435-9/118802707_4386688541373004_6769550702385255298_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeF-UhkeyDDV_sdJ3IGn9Z31duFTBENvhZR24VMEQ2-FlG4q2lIMBjkQuyxWsF0zyP27PjYXLTna5IE5QuYrh9tU&_nc_ohc=Qr-BScnppdYQ7kNvgEqtQig&_nc_ht=scontent.fcrk3-2.fna&oh=00_AYDj0EUB-w8R94RVxK3ToUlIlxjqJUZ-1Rs9cHbLb5VTxQ&oe=66A3743D')", backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundPosition: "center" }}>
-
+      <ToastContainer/>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -66,7 +94,7 @@ const ForgotPassword = () => {
             {isLoading ? 'Sending...' : 'Reset Password'}
           </motion.button>
         </form>
-        {message && (
+        {/* {message && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -83,7 +111,7 @@ const ForgotPassword = () => {
           >
             {error}
           </motion.p>
-        )}
+        )} */}
         <div className="mt-6">
           <Link
             to="/"
