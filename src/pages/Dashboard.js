@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const componentRef = useRef(null);
   const [hidden, setHidden] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null);
   
 
   useEffect(() => {
@@ -91,6 +92,8 @@ const Dashboard = () => {
     SPECIAL_SUBJECTS.includes(subject)
   );
 
+
+
   const handleDownloadPDF = async () => {
     setHidden(true);
   
@@ -110,7 +113,7 @@ const Dashboard = () => {
           html2pdf:     { width: input.offsetWidth, height: input.offsetHeight }
         };
 
-        showSuccessToast();
+
 
         const pdfDataUri = await html2pdf().set(opt).from(input).toPdf().output('datauristring');
   
@@ -121,8 +124,9 @@ const Dashboard = () => {
   
         const downloadURL = await getDownloadURL(storageRef);
         
-        window.open(downloadURL, '_blank');
+        setPdfUrl(downloadURL);
 
+        showSuccessToast();
 
       } catch (error) {
         console.error("Error generating or uploading PDF:", error);
@@ -173,16 +177,35 @@ const Dashboard = () => {
           </div>
 
           <div className="flex justify-center">
-            <motion.button
-              whileHover={{scale: 1.03}}
-              whileTap={{scale: 0.95}}
-              className="p-3 px-5 rounded-full text-base font-semibold bg-[#ffeeaa] text-[#494124] hover:bg-[#fce27c] shadow-md"
-              onClick={handleDownloadPDF}
-              disabled={loading}
-            >
-              {loading ? "Generating Clearance PDF..." : "Generate Clearance PDF"}
-            </motion.button>
+
+            <div className="">
+              <motion.button
+                whileHover={{scale: 1.03}}
+                whileTap={{scale: 0.95}}
+                className="mb-5 p-3 px-5 rounded-full text-base font-semibold bg-[#ffeeaa] text-[#494124] hover:bg-[#fce27c] shadow-md"
+                onClick={handleDownloadPDF}
+                disabled={loading}
+              >
+                {loading ? "Generating Clearance PDF..." : "Generate Clearance PDF"}
+              </motion.button>
+
+
+                {pdfUrl && (
+                  <motion.a 
+                  whileHover={{scale: 1.03}}
+                  whileTap={{scale: 0.95}}
+                  href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                  className="hover:cursor-pointer p-3 px-5 rounded-full text-base font-semibold bg-[#aaffbf] text-[#24492c] hover:bg-[#7cfc82] shadow-md flex justify-center">
+                      Download PDF
+
+                  </motion.a>
+                )}
+
+            </div>
+
+
           </div>
+
         </div>
 
         {/* On Screen Page */}
