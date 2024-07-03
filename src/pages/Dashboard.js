@@ -17,6 +17,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "./pdf.css";
 import html2pdf from 'html2pdf.js';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SPECIAL_SUBJECTS = [
   "Librarian",
@@ -34,6 +36,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const componentRef = useRef(null);
   const [hidden, setHidden] = useState(false)
+  
 
   useEffect(() => {
     const updateGreeting = () => {
@@ -106,7 +109,9 @@ const Dashboard = () => {
           pagebreak:    { mode: 'avoid-all' },
           html2pdf:     { width: input.offsetWidth, height: input.offsetHeight }
         };
-  
+
+        showSuccessToast();
+
         const pdfDataUri = await html2pdf().set(opt).from(input).toPdf().output('datauristring');
   
         const storage = getStorage();
@@ -115,22 +120,50 @@ const Dashboard = () => {
         await uploadString(storageRef, pdfDataUri, 'data_url');
   
         const downloadURL = await getDownloadURL(storageRef);
-  
+        
         window.open(downloadURL, '_blank');
+
+
       } catch (error) {
         console.error("Error generating or uploading PDF:", error);
+        showFailedToast();
       } finally {
         setLoading(false);
         setHidden(false);
       }
-    }, 100); // 1000 milliseconds delay (1 second)
+    }, 100);
   };
   
+  const showSuccessToast = () => toast.success('PDF Generated Successfully!', {
+    position: "top-center",
+    autoClose: 2500,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+    });
+
+    const showFailedToast = () => toast.error('PDF Generation Failed', {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      });
   
 
   return (
     <SidebarStudent>
       <div className="container mx-auto bg-blue-100 rounded pb-10">
+        <ToastContainer/>
+
         <div className="bg-blue-300 p-5 rounded flex justify-center items-center mb-10">
           <h2 className="text-3xl font-bold text-blue-950">Dashboard</h2>
         </div>

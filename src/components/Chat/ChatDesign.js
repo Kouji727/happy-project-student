@@ -12,11 +12,15 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const ChatDesign = ({ handleClose, children, subject, facultyUid }) => {
     const { currentUser } = useAuth();
     const [message, setMessage] = useState('');
     const [inquiryFiles, setInquiryFiles] = useState([]);
+    
 
     const handleInquiryFileChange = (e) => {
         setInquiryFiles(Array.from(e.target.files));

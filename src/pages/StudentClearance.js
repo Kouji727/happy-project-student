@@ -30,6 +30,9 @@ import {
   DocumentMagnifyingGlassIcon
 } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const SPECIAL_SUBJECTS = [
   "Librarian",
@@ -67,6 +70,8 @@ const StudentClearance = () => {
   const [subjbectForInquiry, setsubjbectForInquiry] = useState(null)
   const [teacherUID, setTeacherUID] = useState('');
   const [reason, setReason] = useState(null);
+  const [alertMsg, setAlertMsg] = useState(null);
+  const [errAlertMsg, setErrAlertMsg] = useState(null);
 
   const updateTeacherUID = () => {
     const filteredRequirements = officeRequirements.filter(
@@ -253,7 +258,6 @@ const StudentClearance = () => {
   };
 
 
-  //adjust this, add custom alert jecho!!!
   const handleRequestClearance = async (subject, type) => {
 
     if (!studentData || !subject) return;
@@ -289,6 +293,8 @@ const StudentClearance = () => {
             status: "pending",
             studentNo: studentData.studentId,
           });
+          setAlertMsg("Clearance Requested Successfully");
+          showSuccessToast();
         } else {
           alert(
             "No requirements found for this subject. You do not need to request clearance."
@@ -310,10 +316,13 @@ const StudentClearance = () => {
               status: "pending",
               studentNo: studentData.studentId,
             });
+            setAlertMsg("Clearance Requested Successfully");
+            showSuccessToast();
+
           } catch (error) {
             console.error("Error adding document: ", error);
-            // Handle the error here, e.g., show an alert to the user
-            alert("Failed to request clearance. Please try again later.");
+            setErrAlertMsg("Failed to request clearance. Please try again later")
+            showFailedToast();
             return;
           }
         } else {
@@ -337,13 +346,11 @@ const StudentClearance = () => {
         studentId: currentUser.uid
       });
   
-      alert("Clearance requested successfully!");
       setSelectedSubject(null);
       setSelectedSubjectOffice(null);
       setFiles([]);
     } catch (error) {
       console.error("Error requesting clearance:", error);
-      alert("Error requesting clearance. Please try again later.");
     } finally {
       setIsUploading(false);
       setSubmitType(null);
@@ -388,8 +395,9 @@ const StudentClearance = () => {
   
       await handleRequestClearance(subject, type);
     } catch (error) {
+      setErrAlertMsg("Error resubmitting clearance. Please try again later")
+      showFailedToast();
       console.error("Error resubmitting clearance:", error);
-      alert("Error resubmitting clearance request. Please try again later.");
     }
   };
   
@@ -479,16 +487,42 @@ const StudentClearance = () => {
       unsubscribeStudent();
     };
   }, [currentUser, subjbectForInquiry]);
+
+  const showSuccessToast = () => toast.success(alertMsg, {
+    position: "top-center",
+    autoClose: 2500,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+    });
+
+    const showFailedToast = () => toast.error(errAlertMsg, {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      });
+
     
   
   return (
     <SidebarStudent>
+
             <div className="container mx-auto  rounded pb-10">
         <div className="bg-gray-200 mb-4 p-5 rounded flex justify-center items-center">
           <h2 className="text-xl font-bold text-black">Student Clearance</h2>
         </div>
 
-
+      <ToastContainer/>
         {/* Regular Subjects Table */}
         {studentData?.educationLevel !== "college" && (
         <table className="min-w-full bg-white border border-gray-200">
