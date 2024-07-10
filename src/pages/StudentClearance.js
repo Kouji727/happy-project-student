@@ -637,10 +637,7 @@ const StudentClearance = () => {
       </div>
 
       <Modal isOpen={isResubmitModalOpen} onClose={closeResubmitModal}>
-        <motion.div className="p-6"
-                    initial={{opacity: 0}}
-                    animate={{opacity: 1}}
-                    exit={{opacity: 0}}>
+        <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">
             Resubmit Clearance Request
           </h3>
@@ -649,21 +646,28 @@ const StudentClearance = () => {
             <strong>{subjectToResubmit}</strong>? This will delete your previous
             request.
           </p>
-          <div className="mt-6 flex justify-end">
-            <button
+          <div className="mt-6 flex justify-around">
+            <motion.button
+            whileHover={{scale: 1.03}}
+            whileTap={{scale: 0.95}}
+            
               onClick={closeResubmitModal}
-              className="mr-2 px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+              className="mr-2 px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 w-full"
             >
               Cancel
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
+            whileHover={{scale: 1.03}}
+            whileTap={{scale: 0.95}}
+            
               onClick={() => handleResubmitClearance(subjectToResubmit, subjectType)}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
             >
               Resubmit
-            </button>
+            </motion.button>
           </div>
-        </motion.div>
+        </div>
       </Modal>
 
       <AnimatePresence

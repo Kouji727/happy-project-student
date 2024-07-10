@@ -129,7 +129,7 @@ const SignIn = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.3 }}
-        className="bg-white p-10 rounded-lg shadow-lg w-[90%] sm:max-w-md"
+        className="bg-[#ffffffe5] p-10 rounded-lg shadow-2xl w-[90%] sm:max-w-md"
       >
         <div className="flex justify-center mb-6">
           <img
